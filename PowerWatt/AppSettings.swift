@@ -10,6 +10,23 @@ final class AppSettings: ObservableObject {
         }
     }
 
+    enum DisplayMode: Int, CaseIterable, Identifiable {
+        case netOnly
+        case separateInOut
+
+        var id: Int { rawValue }
+        var title: String {
+            switch self {
+            case .netOnly: return "Net Only (IN−OUT)"
+            case .separateInOut: return "Separate IN and OUT"
+            }
+        }
+    }
+
+    @Published var displayMode: DisplayMode {
+        didSet { UserDefaults.standard.set(displayMode.rawValue, forKey: Keys.displayMode) }
+    }
+
     enum LabelStyle: Int, CaseIterable, Identifiable {
         case iconAndWatts
         case wattsOnly
@@ -51,7 +68,10 @@ final class AppSettings: ObservableObject {
 
     private init() {
         let saved = UserDefaults.standard.double(forKey: Keys.refreshIntervalSeconds)
-        self.refreshIntervalSeconds = saved > 0 ? saved : 5.0
+        self.refreshIntervalSeconds = saved > 0 ? saved : 2.0
+
+        let displayModeRaw = UserDefaults.standard.integer(forKey: Keys.displayMode)
+        self.displayMode = DisplayMode(rawValue: displayModeRaw) ?? .netOnly
 
         let styleRaw = UserDefaults.standard.integer(forKey: Keys.labelStyle)
         self.labelStyle = LabelStyle(rawValue: styleRaw) ?? .iconAndWatts
@@ -68,6 +88,7 @@ final class AppSettings: ObservableObject {
 
     private enum Keys {
         static let refreshIntervalSeconds = "refreshIntervalSeconds"
+        static let displayMode = "displayMode"
         static let labelStyle = "labelStyle"
         static let decimalPlaces = "decimalPlaces"
         static let showBatteryPercentInMenu = "showBatteryPercentInMenu"

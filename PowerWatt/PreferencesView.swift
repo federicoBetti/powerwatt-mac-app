@@ -28,6 +28,11 @@ struct PreferencesView: View {
             }
 
             Section("Menu Bar") {
+                Picker("Display mode", selection: $settings.displayMode) {
+                    ForEach(AppSettings.DisplayMode.allCases) { mode in
+                        Text(mode.title).tag(mode)
+                    }
+                }
                 Picker("Label style", selection: $settings.labelStyle) {
                     ForEach(AppSettings.LabelStyle.allCases) { style in
                         Text(style.title).tag(style)
@@ -54,6 +59,14 @@ struct PreferencesView: View {
                 Text("Averages power readings over a short window to reduce flicker.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                if let capacity = powerService.batteryCapacityWh {
+                    HStack {
+                        Text("Battery capacity")
+                            .foregroundStyle(.secondary)
+                        Text(String(format: "%.1f Wh", capacity))
+                            .monospacedDigit()
+                    }
+                }
             }
         }
         .padding(16)

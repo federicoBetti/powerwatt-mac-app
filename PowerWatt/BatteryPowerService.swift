@@ -7,6 +7,7 @@ final class BatteryPowerService: ObservableObject {
     @Published private(set) var outWatts: Double?
     @Published private(set) var isCharging: Bool = false
     @Published private(set) var batteryPercent: Int?
+    @Published private(set) var batteryCapacityWh: Double?
 
     private var timer: Timer?
     private var readings: [(timestamp: TimeInterval, inW: Double?, outW: Double?)] = []
@@ -48,6 +49,9 @@ final class BatteryPowerService: ObservableObject {
         let isChargingNow = props["IsCharging"] as? Bool ?? false
         let currentCapacity = props["CurrentCapacity"] as? Int
         let maxCapacity = props["MaxCapacity"] as? Int
+        let designCapacity = props["DesignCapacity"] as? Int
+        // Battery Pack Voltage in mV (nominal pack voltage)
+        let packVoltageMilli = props["Voltage"] as? Int
 
         var inW: Double?
         var outW: Double?
@@ -68,10 +72,18 @@ final class BatteryPowerService: ObservableObject {
             percent = nil
         }
 
-        smoothAndPublish(inW: inW, outW: outW, isCharging: isChargingNow, batteryPercent: percent)
+        var capacityWh: Double?
+        if let max = maxCapacity, let vMilli = packVoltageMilli, max > 0 {
+            // Convert mAh and mV -> Wh: (mAh * mV) / 1,000,000
+            capacityWh = (Double(max) * Double(vMilli)) / 1_000_000.0
+        } else if let design = designCapacity, let vMilli = packVoltageMilli, design > 0 {
+            capacityWh = (Double(design) * Double(vMilli)) / 1_000_000.0
+        }
+
+        smoothAndPublish(inW: inW, outW: outW, isCharging: isChargingNow, batteryPercent: percent, capacityWh: capacityWh)
     }
 
-    private func smoothAndPublish(inW: Double?, outW: Double?, isCharging: Bool, batteryPercent: Int?) {
+    private func smoothAndPublish(inW: Double?, outW: Double?, isCharging: Bool, batteryPercent: Int?, capacityWh: Double?) {
         let now = Date().timeIntervalSince1970
         readings.append((timestamp: now, inW: inW, outW: outW))
 
@@ -98,6 +110,7 @@ final class BatteryPowerService: ObservableObject {
             self.outWatts = avgOut ?? outW
             self.isCharging = isCharging
             self.batteryPercent = batteryPercent
+            self.batteryCapacityWh = capacityWh
         }
     }
 }

@@ -65,8 +65,23 @@ private struct MenuBarLabelView: View {
         return Group {
             switch settings.labelStyle {
             case .iconAndWatts:
-                // Show both when charging; otherwise one
-                if powerService.isCharging, (inW ?? 0) > 0.05 {
+                if settings.displayMode == .netOnly {
+                    // Net = IN - OUT when charging; else -OUT when discharging
+                    let net: Double? = {
+                        if powerService.isCharging {
+                            if let inW, let outW { return inW - outW }
+                            return inW ?? 0
+                        } else {
+                            return outW.map { -$0 } ?? nil
+                        }
+                    }()
+                    HStack(spacing: 4) {
+                        Image(systemName: net.map { $0 >= 0 } ?? false ? "bolt.fill" : "bolt.slash.fill")
+                            .foregroundStyle(useColor ? (net ?? 0 >= 0 ? .green : .red) : .primary)
+                        Text(wattsString(net?.magnitude))
+                            .monospacedDigit()
+                    }
+                } else if powerService.isCharging, (inW ?? 0) > 0.05 {
                     HStack(spacing: 4) {
                         Image(systemName: "bolt.fill").foregroundStyle(useColor ? .green : .primary)
                         Text("IN \(wattsString(inW))").monospacedDigit()
@@ -93,7 +108,17 @@ private struct MenuBarLabelView: View {
                     }
                 }
             case .wattsOnly:
-                if powerService.isCharging, (inW ?? 0) > 0.05 {
+                if settings.displayMode == .netOnly {
+                    let net: Double? = {
+                        if powerService.isCharging {
+                            if let inW, let outW { return inW - outW }
+                            return inW ?? 0
+                        } else {
+                            return outW.map { -$0 } ?? nil
+                        }
+                    }()
+                    Text(wattsString(net?.magnitude)).monospacedDigit()
+                } else if powerService.isCharging, (inW ?? 0) > 0.05 {
                     HStack(spacing: 4) {
                         Text("IN \(wattsString(inW))").monospacedDigit()
                         if let outWatts = outW, outWatts > 0.05 {
@@ -109,7 +134,21 @@ private struct MenuBarLabelView: View {
                     Text(wattsString(nil)).monospacedDigit()
                 }
             case .prefixAndWatts:
-                if powerService.isCharging, (inW ?? 0) > 0.05 {
+                if settings.displayMode == .netOnly {
+                    let net: Double? = {
+                        if powerService.isCharging {
+                            if let inW, let outW { return inW - outW }
+                            return inW ?? 0
+                        } else {
+                            return outW.map { -$0 } ?? nil
+                        }
+                    }()
+                    HStack(spacing: 2) {
+                        Text(net.map { $0 >= 0 } ?? false ? "NET " : "NET ")
+                            .foregroundStyle(useColor ? (net ?? 0 >= 0 ? .green : .red) : .primary)
+                        Text(wattsString(net?.magnitude)).monospacedDigit()
+                    }
+                } else if powerService.isCharging, (inW ?? 0) > 0.05 {
                     HStack(spacing: 4) {
                         HStack(spacing: 2) {
                             Text("IN ").foregroundStyle(useColor ? .green : .primary)
