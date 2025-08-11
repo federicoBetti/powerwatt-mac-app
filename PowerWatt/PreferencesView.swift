@@ -45,7 +45,7 @@ struct PreferencesView: View {
 
                 Toggle("Colored indicators", isOn: $settings.coloredIndicators)
                 Toggle("Show battery percent in menu", isOn: $settings.showBatteryPercentInMenu)
-                Toggle("Show both IN and OUT when charging", isOn: $settings.showBothWhenCharging)
+
             }
 
             Section("Advanced") {
@@ -59,17 +59,34 @@ struct PreferencesView: View {
                 Text("Averages power readings over a short window to reduce flicker.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                
                 if let capacity = powerService.batteryCapacityWh {
                     HStack {
                         Text("Battery capacity")
                             .foregroundStyle(.secondary)
+                        Spacer()
                         Text(String(format: "%.1f Wh", capacity))
                             .monospacedDigit()
+                        Button(action: {
+                            // Show info about battery capacity
+                            let alert = NSAlert()
+                            alert.messageText = "Battery Capacity"
+                            alert.informativeText = "This shows your Mac's total battery capacity in Watt-hours (Wh). This is the maximum energy your battery can store when fully charged. A typical MacBook Pro has between 58-100 Wh depending on the model."
+                            alert.alertStyle = .informational
+                            alert.addButton(withTitle: "OK")
+                            alert.runModal()
+                        }) {
+                            Image(systemName: "info.circle")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .help("More information about battery capacity")
                     }
                 }
             }
         }
         .padding(16)
+        .frame(minHeight: 400)
     }
 }
 

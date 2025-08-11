@@ -30,9 +30,23 @@ struct PowerWattApp: App {
             PreferencesView()
                 .environmentObject(settings)
                 .environmentObject(powerService)
-                .frame(width: 420)
+                .frame(width: 480, height: 500)
         }
     }
+}
+
+private func openSettingsWindow() {
+    #if canImport(AppKit)
+    if let url = URL(string: "x-apple.systempreferences:com.apple.preference") {
+        // Fallback noop; we'll try native below
+        _ = url
+    }
+    if #available(macOS 13.0, *) {
+        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+    } else {
+        NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+    }
+    #endif
 }
 
 private struct MenuBarLabelView: View {
@@ -47,7 +61,10 @@ private struct MenuBarLabelView: View {
             }
         }
         .onAppear {
-            powerService.startPolling(intervalSeconds: AppSettings.shared.refreshIntervalSeconds)
+            powerService.startPolling(intervalSeconds: settings.refreshIntervalSeconds)
+        }
+        .onChange(of: settings.refreshIntervalSeconds) { _, newValue in
+            powerService.startPolling(intervalSeconds: newValue)
         }
     }
 
@@ -76,30 +93,39 @@ private struct MenuBarLabelView: View {
                         }
                     }()
                     HStack(spacing: 4) {
-                        Image(systemName: net.map { $0 >= 0 } ?? false ? "bolt.fill" : "bolt.slash.fill")
-                            .foregroundStyle(useColor ? (net ?? 0 >= 0 ? .green : .red) : .primary)
+                        let isPositive = (net ?? 0) >= 0
+                        Image(systemName: isPositive ? "bolt.fill" : "bolt.slash.fill")
+                            .foregroundStyle(useColor ? (isPositive ? .green : .red) : .primary)
                         Text(wattsString(net?.magnitude))
+                            .foregroundStyle(useColor ? (isPositive ? .green : .red) : .primary)
                             .monospacedDigit()
                     }
-                } else if powerService.isCharging, (inW ?? 0) > 0.05 {
+                } else if powerService.isCharging {
+                    // Separate mode while charging: always show both IN and OUT (contracted)
                     HStack(spacing: 4) {
                         Image(systemName: "bolt.fill").foregroundStyle(useColor ? .green : .primary)
-                        Text("IN \(wattsString(inW))").monospacedDigit()
-                        if let outWatts = outW, outWatts > 0.05 {
-                            Text("|")
-                            Image(systemName: "bolt.slash.fill").foregroundStyle(useColor ? .red : .primary)
-                            Text(wattsString(outWatts)).monospacedDigit()
-                        }
+                        Text(wattsString(inW))
+                            .foregroundStyle(useColor ? .green : .primary)
+                            .monospacedDigit()
+                        Text("|")
+                        Image(systemName: "bolt.slash.fill").foregroundStyle(useColor ? .red : .primary)
+                        Text(wattsString(outW))
+                            .foregroundStyle(useColor ? .red : .primary)
+                            .monospacedDigit()
                     }
                 } else if let inWatts = inW, inWatts > 0.05 {
                     HStack(spacing: 4) {
                         Image(systemName: "bolt.fill").foregroundStyle(useColor ? .green : .primary)
-                        Text(wattsString(inWatts)).monospacedDigit()
+                        Text(wattsString(inWatts))
+                            .foregroundStyle(useColor ? .green : .primary)
+                            .monospacedDigit()
                     }
                 } else if let outWatts = outW, outWatts > 0.05 {
                     HStack(spacing: 4) {
                         Image(systemName: "bolt.slash.fill").foregroundStyle(useColor ? .red : .primary)
-                        Text(wattsString(outWatts)).monospacedDigit()
+                        Text(wattsString(outWatts))
+                            .foregroundStyle(useColor ? .red : .primary)
+                            .monospacedDigit()
                     }
                 } else {
                     HStack(spacing: 4) {
@@ -117,19 +143,27 @@ private struct MenuBarLabelView: View {
                             return outW.map { -$0 } ?? nil
                         }
                     }()
-                    Text(wattsString(net?.magnitude)).monospacedDigit()
-                } else if powerService.isCharging, (inW ?? 0) > 0.05 {
+                    Text(wattsString(net?.magnitude))
+                        .foregroundStyle(useColor ? ((net ?? 0) >= 0 ? .green : .red) : .primary)
+                        .monospacedDigit()
+                } else if powerService.isCharging {
                     HStack(spacing: 4) {
-                        Text("IN \(wattsString(inW))").monospacedDigit()
-                        if let outWatts = outW, outWatts > 0.05 {
-                            Text("|")
-                            Text(wattsString(outWatts)).monospacedDigit()
-                        }
+                        Text(wattsString(inW))
+                            .foregroundStyle(useColor ? .green : .primary)
+                            .monospacedDigit()
+                        Text("|")
+                        Text(wattsString(outW))
+                            .foregroundStyle(useColor ? .red : .primary)
+                            .monospacedDigit()
                     }
                 } else if let inWatts = inW, inWatts > 0.05 {
-                    Text(wattsString(inWatts)).monospacedDigit()
+                    Text(wattsString(inWatts))
+                        .foregroundStyle(useColor ? .green : .primary)
+                        .monospacedDigit()
                 } else if let outWatts = outW, outWatts > 0.05 {
-                    Text(wattsString(outWatts)).monospacedDigit()
+                    Text(wattsString(outWatts))
+                        .foregroundStyle(useColor ? .red : .primary)
+                        .monospacedDigit()
                 } else {
                     Text(wattsString(nil)).monospacedDigit()
                 }
@@ -144,33 +178,42 @@ private struct MenuBarLabelView: View {
                         }
                     }()
                     HStack(spacing: 2) {
-                        Text(net.map { $0 >= 0 } ?? false ? "NET " : "NET ")
-                            .foregroundStyle(useColor ? (net ?? 0 >= 0 ? .green : .red) : .primary)
-                        Text(wattsString(net?.magnitude)).monospacedDigit()
+                        let isPositive = (net ?? 0) >= 0
+                        Text("NET ")
+                            .foregroundStyle(useColor ? (isPositive ? .green : .red) : .primary)
+                        Text(wattsString(net?.magnitude))
+                            .foregroundStyle(useColor ? (isPositive ? .green : .red) : .primary)
+                            .monospacedDigit()
                     }
-                } else if powerService.isCharging, (inW ?? 0) > 0.05 {
+                } else if powerService.isCharging {
                     HStack(spacing: 4) {
                         HStack(spacing: 2) {
                             Text("IN ").foregroundStyle(useColor ? .green : .primary)
-                            Text(wattsString(inW)).monospacedDigit()
+                            Text(wattsString(inW))
+                                .foregroundStyle(useColor ? .green : .primary)
+                                .monospacedDigit()
                         }
-                        if let outWatts = outW, outWatts > 0.05 {
-                            Text("|")
-                            HStack(spacing: 2) {
-                                Text("OUT ").foregroundStyle(useColor ? .red : .primary)
-                                Text(wattsString(outWatts)).monospacedDigit()
-                            }
+                        Text("|")
+                        HStack(spacing: 2) {
+                            Text("OUT ").foregroundStyle(useColor ? .red : .primary)
+                            Text(wattsString(outW))
+                                .foregroundStyle(useColor ? .red : .primary)
+                                .monospacedDigit()
                         }
                     }
                 } else if let inWatts = inW, inWatts > 0.05 {
                     HStack(spacing: 2) {
                         Text("IN ").foregroundStyle(useColor ? .green : .primary)
-                        Text(wattsString(inWatts)).monospacedDigit()
+                        Text(wattsString(inWatts))
+                            .foregroundStyle(useColor ? .green : .primary)
+                            .monospacedDigit()
                     }
                 } else if let outWatts = outW, outWatts > 0.05 {
                     HStack(spacing: 2) {
                         Text("OUT ").foregroundStyle(useColor ? .red : .primary)
-                        Text(wattsString(outWatts)).monospacedDigit()
+                        Text(wattsString(outWatts))
+                            .foregroundStyle(useColor ? .red : .primary)
+                            .monospacedDigit()
                     }
                 } else {
                     Text("--.- W").monospacedDigit()
@@ -220,40 +263,14 @@ private struct MenuContentView: View {
 
             Divider()
 
-            VStack(alignment: .leading) {
-                Text("Refresh interval")
-                    .foregroundStyle(.secondary)
-                HStack {
-                    Slider(value: $settings.refreshIntervalSeconds, in: 1...60, step: 1) {
-                        Text("Refresh interval")
-                    } minimumValueLabel: {
-                        Text("1s")
-                    } maximumValueLabel: {
-                        Text("60s")
-                    }
-                    .frame(width: 180)
-                    Text("\(Int(settings.refreshIntervalSeconds))s")
-                        .monospacedDigit()
-                        .frame(width: 44, alignment: .trailing)
+            if #available(macOS 14.0, *) {
+                SettingsLink {
+                    Text("Preferences…")
                 }
-                .onChange(of: settings.refreshIntervalSeconds) { _, newValue in
-                    powerService.startPolling(intervalSeconds: newValue)
+            } else {
+                Button("Preferences…") {
+                    openSettingsWindow()
                 }
-            }
-
-            Toggle(isOn: Binding<Bool>(
-                get: { LoginItemManager.isEnabled },
-                set: { newValue in
-                    if newValue { _ = try? LoginItemManager.enable() } else { _ = try? LoginItemManager.disable() }
-                }
-            )) {
-                Text("Open at Login")
-            }
-
-            Divider()
-
-            Button("Preferences…") {
-                NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
             }
             Button("Quit PowerWatt") {
                 NSApp.terminate(nil)
@@ -267,3 +284,4 @@ private struct MenuContentView: View {
         }
     }
 }
+

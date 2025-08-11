@@ -62,9 +62,7 @@ final class AppSettings: ObservableObject {
         didSet { UserDefaults.standard.set(smoothingWindowSeconds, forKey: Keys.smoothingWindowSeconds) }
     }
 
-    @Published var showBothWhenCharging: Bool {
-        didSet { UserDefaults.standard.set(showBothWhenCharging, forKey: Keys.showBothWhenCharging) }
-    }
+
 
     private init() {
         let saved = UserDefaults.standard.double(forKey: Keys.refreshIntervalSeconds)
@@ -83,7 +81,6 @@ final class AppSettings: ObservableObject {
         self.coloredIndicators = UserDefaults.standard.object(forKey: Keys.coloredIndicators) as? Bool ?? true
         let windowSaved = UserDefaults.standard.double(forKey: Keys.smoothingWindowSeconds)
         self.smoothingWindowSeconds = windowSaved >= 0 ? windowSaved : 5.0
-        self.showBothWhenCharging = UserDefaults.standard.object(forKey: Keys.showBothWhenCharging) as? Bool ?? false
     }
 
     private enum Keys {
@@ -94,7 +91,7 @@ final class AppSettings: ObservableObject {
         static let showBatteryPercentInMenu = "showBatteryPercentInMenu"
         static let coloredIndicators = "coloredIndicators"
         static let smoothingWindowSeconds = "smoothingWindowSeconds"
-        static let showBothWhenCharging = "showBothWhenCharging"
+
     }
 }
 
