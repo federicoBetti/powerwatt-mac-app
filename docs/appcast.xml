@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>PowerWatt Updates</title>
+    <link>https://federicoBetti.github.io/powerwatt-mac-app/</link>
+    <description>PowerWatt appcast</description>
+    <language>en</language>
+
+    <!--
+      This file is intentionally a placeholder.
+      It will be overwritten on each tagged release by CI.
+    -->
+
+  </channel>
+</rss>

@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9AC0B1DE2EF35FDA0062F77F /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 9AC0B1B62EF3700A0062F77F /* Sparkle */; };
+		9AC0B1DF2EF35FDA0062F77F /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 9AC0B1B72EF3700A0062F77F /* PostHog */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		9A4CE9902E462E6D001A9D76 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9AC0B1DF2EF35FDA0062F77F /* PostHog in Frameworks */,
+				9AC0B1DE2EF35FDA0062F77F /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +119,8 @@
 			);
 			name = PowerWatt;
 			packageProductDependencies = (
+				9AC0B1B62EF3700A0062F77F /* Sparkle */,
+				9AC0B1B72EF3700A0062F77F /* PostHog */,
 			);
 			productName = PowerWatt;
 			productReference = 9A4CE97E2E462E6B001A9D76 /* PowerWatt.app */;
@@ -402,7 +411,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"PowerWatt/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PowerWatt/Info.plist;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -428,7 +438,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"PowerWatt/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PowerWatt/Info.plist;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -566,6 +577,19 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9AC0B1B62EF3700A0062F77F /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9AC0B1A42EF358760062F77F /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+		9AC0B1B72EF3700A0062F77F /* PostHog */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9AC0B1A52EF358AD0062F77F /* XCRemoteSwiftPackageReference "posthog-ios" */;
+			productName = PostHog;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9A4CE9762E462E6B001A9D76 /* Project object */;
 }

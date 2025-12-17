@@ -13,16 +13,21 @@ import ServiceManagement
 struct PowerWattApp: App {
     @StateObject private var settings = AppSettings.shared
     @StateObject private var powerService = BatteryPowerService()
+    @StateObject private var updaterManager = UpdaterManager()
+    private let telemetryManager = TelemetryManager.shared
 
     var body: some Scene {
         MenuBarExtra {
             MenuContentView()
                 .environmentObject(settings)
                 .environmentObject(powerService)
+                .environmentObject(updaterManager)
+                .environmentObject(telemetryManager)
         } label: {
             MenuBarLabelView()
                 .environmentObject(powerService)
                 .environmentObject(settings)
+                .environmentObject(telemetryManager)
         }
         .menuBarExtraStyle(.window)
 
@@ -30,6 +35,8 @@ struct PowerWattApp: App {
             PreferencesView()
                 .environmentObject(settings)
                 .environmentObject(powerService)
+                .environmentObject(updaterManager)
+                .environmentObject(telemetryManager)
                 .frame(width: 480, height: 500)
         }
     }
@@ -52,6 +59,7 @@ private func openSettingsWindow() {
 private struct MenuBarLabelView: View {
     @EnvironmentObject var powerService: BatteryPowerService
     @EnvironmentObject var settings: AppSettings
+    @EnvironmentObject var telemetryManager: TelemetryManager
 
     var body: some View {
         HStack(spacing: 4) {
@@ -61,6 +69,7 @@ private struct MenuBarLabelView: View {
             }
         }
         .onAppear {
+            telemetryManager.handleAppLaunch()
             powerService.startPolling(intervalSeconds: settings.refreshIntervalSeconds)
         }
         .onChange(of: settings.refreshIntervalSeconds) { _, newValue in
@@ -226,6 +235,8 @@ private struct MenuBarLabelView: View {
 private struct MenuContentView: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var powerService: BatteryPowerService
+    @EnvironmentObject var updaterManager: UpdaterManager
+    @EnvironmentObject var telemetryManager: TelemetryManager
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -262,6 +273,11 @@ private struct MenuContentView: View {
             }
 
             Divider()
+
+            Button("Check for Updates…") {
+                telemetryManager.capture(event: "feature_used", properties: ["feature_name": "check_for_updates", "context": "menu"])
+                updaterManager.checkForUpdates()
+            }
 
             if #available(macOS 14.0, *) {
                 SettingsLink {

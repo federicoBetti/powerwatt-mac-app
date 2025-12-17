@@ -38,8 +38,8 @@ A sleek menu bar app for macOS that displays real-time battery power consumption
 
 ### Build from Source
 ```bash
-git clone git@github.com:federicoBetti/powerwatt-mac.git
-cd powerwatt-mac
+git clone git@github.com:federicoBetti/powerwatt-mac-app.git
+cd powerwatt-mac-app
 open PowerWatt.xcodeproj
 ```
 
@@ -49,6 +49,28 @@ open PowerWatt.xcodeproj
 
 ### Distribution
 For distribution, build a Release version and codesign the app. Place in `/Applications` for best "Open at Login" compatibility.
+
+## GitHub Pages (download site)
+
+This repository is set up to serve a public download page (and Sparkle appcast) from the `/docs` folder.
+
+### Enable GitHub Pages (one-time)
+1. Open the repo on GitHub → **Settings** → **Pages**.
+2. Under **Build and deployment**, choose **Deploy from a branch**.
+3. Select branch **main** and folder **/docs**, then save.
+
+### Expected URLs
+- Site: `https://federicoBetti.github.io/powerwatt-mac-app/`
+- Appcast: `https://federicoBetti.github.io/powerwatt-mac-app/appcast.xml`
+
+## fbetti.com download page (next steps)
+
+This work happens outside the repo, but keeping the checklist here makes it harder to forget:
+
+- [ ] Create a public-facing Download page on `fbetti.com`.
+- [ ] Point the main call-to-action button to `https://github.com/federicoBetti/powerwatt-mac-app/releases/latest/download/PowerWatt.dmg`.
+- [ ] Mirror the same install instructions and privacy summary that appear on `docs/index.html` / `docs/privacy.html`.
+- [ ] (Optional) Embed a “Latest version” badge fed by the GitHub Releases API so visitors can see the current tag.
 
 ## Usage
 

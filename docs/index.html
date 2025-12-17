@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PowerWatt for macOS</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: rgba(255, 255, 255, 0.06);
+      --text: rgba(255, 255, 255, 0.92);
+      --muted: rgba(255, 255, 255, 0.70);
+      --border: rgba(255, 255, 255, 0.12);
+      --btn: #4f46e5;
+      --btnText: #ffffff;
+      --link: #93c5fd;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f6f7fb;
+        --card: rgba(0, 0, 0, 0.04);
+        --text: rgba(0, 0, 0, 0.90);
+        --muted: rgba(0, 0, 0, 0.62);
+        --border: rgba(0, 0, 0, 0.10);
+        --btn: #4f46e5;
+        --btnText: #ffffff;
+        --link: #1d4ed8;
+      }
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 600px at 20% 10%, rgba(79, 70, 229, 0.35), transparent 55%),
+        radial-gradient(900px 500px at 90% 30%, rgba(14, 165, 233, 0.22), transparent 60%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 56px 20px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 44px;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    .cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--btn);
+      color: var(--btnText);
+      text-decoration: none;
+      font-weight: 650;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .btn.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    a {
+      color: var(--link);
+    }
+
+    ul {
+      margin: 10px 0 0 18px;
+      color: var(--muted);
+    }
+
+    .small {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .footer {
+      margin-top: 22px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    code {
+      background: rgba(255, 255, 255, 0.10);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <h1>PowerWatt</h1>
+        <p>A lightweight macOS menu bar app that shows your battery power usage (IN/OUT watts) in real time.</p>
+
+        <div class="cta">
+          <a class="btn"
+            href="https://github.com/federicoBetti/powerwatt-mac-app/releases/latest/download/PowerWatt.dmg">Download
+            PowerWatt (DMG)</a>
+          <a class="btn secondary"
+            href="https://github.com/federicoBetti/powerwatt-mac-app/releases/latest/download/PowerWatt.zip">Download
+            ZIP</a>
+        </div>
+
+        <p class="small" style="margin-top: 10px;">These links always point to the latest GitHub Release.</p>
+      </div>
+
+      <div class="card">
+        <h2 style="margin: 0 0 8px; font-size: 18px;">Install</h2>
+        <ul>
+          <li>Open the downloaded <code>.dmg</code> and drag <code>PowerWatt.app</code> to <code>Applications</code>.
+          </li>
+          <li>On first launch, if macOS blocks the app, right-click <code>PowerWatt.app</code> → <b>Open</b>.</li>
+          <li>PowerWatt runs in the menu bar (no Dock icon).</li>
+        </ul>
+
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;" />
+
+        <h2 style="margin: 0 0 8px; font-size: 18px;">Privacy</h2>
+        <p>Optional anonymous usage statistics are <b>off by default</b> and can be enabled/disabled anytime in
+          Preferences.</p>
+        <p class="small"><a href="privacy.html">Read the privacy details</a></p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="small">© PowerWatt • Open-source macOS utility</div>
+      <div class="small"><a href="https://github.com/federicoBetti/powerwatt-mac-app">Source on GitHub</a></div>
+    </div>
+  </div>
+</body>
+
+</html>

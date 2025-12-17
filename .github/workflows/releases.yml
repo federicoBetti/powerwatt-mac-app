@@ -1,0 +1,169 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    env:
+      SPARKLE_VERSION: "2.8.1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve Swift packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project "PowerWatt.xcodeproj" \
+            -scheme "PowerWatt" \
+            -resolvePackageDependencies
+
+      - name: Compute version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG_NAME="${GITHUB_REF_NAME}"
+          VERSION="${TAG_NAME#v}"
+          echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Build (Release)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          xcodebuild \
+            -project "PowerWatt.xcodeproj" \
+            -scheme "PowerWatt" \
+            -configuration Release \
+            -destination "platform=macOS" \
+            -derivedDataPath "build/DerivedData" \
+            MARKETING_VERSION="${{ steps.version.outputs.version }}" \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+
+          APP_PATH="build/DerivedData/Build/Products/Release/PowerWatt.app"
+          if [[ ! -d "$APP_PATH" ]]; then
+            echo "Expected app not found at $APP_PATH" >&2
+            exit 1
+          fi
+
+          echo "APP_PATH=$APP_PATH" >> "$GITHUB_ENV"
+
+      - name: Ad-hoc codesign app
+        shell: bash
+        run: |
+          set -euo pipefail
+          codesign --force --deep --sign - --entitlements "PowerWatt/PowerWatt.entitlements" "$APP_PATH"
+          codesign --verify --deep --strict "$APP_PATH"
+
+      - name: Package ZIP + DMG
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          rm -rf dist dmgroot updates
+          mkdir -p dist dmgroot updates
+
+          # Sparkle prefers .zip archives
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "dist/PowerWatt.zip"
+
+          # DMG for human-friendly download
+          cp -R "$APP_PATH" "dmgroot/PowerWatt.app"
+          hdiutil create -volname "PowerWatt" -srcfolder "dmgroot" -ov -format UDZO "dist/PowerWatt.dmg"
+
+          # Appcast generation input
+          cp "dist/PowerWatt.zip" "updates/PowerWatt.zip"
+
+      - name: Cache Sparkle tools
+        id: cache-sparkle
+        uses: actions/cache@v4
+        with:
+          path: sparkle-tools
+          key: sparkle-tools-${{ env.SPARKLE_VERSION }}
+
+      - name: Download Sparkle tools
+        if: steps.cache-sparkle.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p sparkle-tools
+          curl -L -o "sparkle-tools/Sparkle-${SPARKLE_VERSION}.tar.xz" "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz"
+          tar -xf "sparkle-tools/Sparkle-${SPARKLE_VERSION}.tar.xz" -C "sparkle-tools"
+
+      - name: Export Sparkle binary path
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "SPARKLE_BIN=$(pwd)/sparkle-tools/bin" >> "$GITHUB_ENV"
+
+      - name: Generate appcast.xml
+        shell: bash
+        env:
+          SPARKLE_EDDSA_PRIVATE_KEY_BASE64: ${{ secrets.SPARKLE_EDDSA_PRIVATE_KEY_BASE64 }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${SPARKLE_EDDSA_PRIVATE_KEY_BASE64:-}" ]]; then
+            echo "Missing secret SPARKLE_EDDSA_PRIVATE_KEY_BASE64" >&2
+            exit 1
+          fi
+
+          KEY_FILE="sparkle_ed25519_private_key"
+          python3 - <<'PY'
+import base64, os
+key_b64 = os.environ.get('SPARKLE_EDDSA_PRIVATE_KEY_BASE64', '')
+raw = base64.b64decode(key_b64)
+with open('sparkle_ed25519_private_key', 'wb') as f:
+    f.write(raw)
+PY
+
+          DOWNLOAD_PREFIX="https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}"
+
+          "$SPARKLE_BIN/generate_appcast" \
+            --ed-key-file "$KEY_FILE" \
+            --download-url-prefix "$DOWNLOAD_PREFIX" \
+            "updates"
+
+          rm -f "$KEY_FILE"
+
+          if [[ ! -f "updates/appcast.xml" ]]; then
+            echo "Appcast was not generated" >&2
+            exit 1
+          fi
+
+          # Update Pages appcast on main branch
+          git fetch origin main
+          git checkout -B main origin/main
+          cp "updates/appcast.xml" "docs/appcast.xml"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "${{ steps.version.outputs.tag }}"
+          tag_name: "${{ steps.version.outputs.tag }}"
+          files: |
+            dist/PowerWatt.dmg
+            dist/PowerWatt.zip
+
+      - name: Commit updated docs/appcast.xml
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update Sparkle appcast for ${{ steps.version.outputs.tag }}"
+          file_pattern: "docs/appcast.xml"
+          branch: main

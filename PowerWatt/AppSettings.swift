@@ -10,6 +10,14 @@ final class AppSettings: ObservableObject {
         }
     }
 
+    @Published var telemetryEnabled: Bool {
+        didSet { UserDefaults.standard.set(telemetryEnabled, forKey: Keys.telemetryEnabled) }
+    }
+
+    @Published var telemetryPromptShown: Bool {
+        didSet { UserDefaults.standard.set(telemetryPromptShown, forKey: Keys.telemetryPromptShown) }
+    }
+
     enum DisplayMode: Int, CaseIterable, Identifiable {
         case netOnly
         case separateInOut
@@ -68,6 +76,9 @@ final class AppSettings: ObservableObject {
         let saved = UserDefaults.standard.double(forKey: Keys.refreshIntervalSeconds)
         self.refreshIntervalSeconds = saved > 0 ? saved : 2.0
 
+        self.telemetryEnabled = UserDefaults.standard.bool(forKey: Keys.telemetryEnabled)
+        self.telemetryPromptShown = UserDefaults.standard.bool(forKey: Keys.telemetryPromptShown)
+
         let displayModeRaw = UserDefaults.standard.integer(forKey: Keys.displayMode)
         self.displayMode = DisplayMode(rawValue: displayModeRaw) ?? .netOnly
 
@@ -85,6 +96,8 @@ final class AppSettings: ObservableObject {
 
     private enum Keys {
         static let refreshIntervalSeconds = "refreshIntervalSeconds"
+        static let telemetryEnabled = "telemetryEnabled"
+        static let telemetryPromptShown = "telemetryPromptShown"
         static let displayMode = "displayMode"
         static let labelStyle = "labelStyle"
         static let decimalPlaces = "decimalPlaces"
