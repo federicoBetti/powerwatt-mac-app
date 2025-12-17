@@ -8,7 +8,7 @@
             <sparkle:version>3</sparkle:version>
             <sparkle:shortVersionString>1.0.2</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.2</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/federicoBetti/powerwatt-mac-app/releases/download/PowerWatt.zip" length="1884453" type="application/octet-stream" sparkle:edSignature="v95n5b05G+XkiJ/KSLiGOXNq2337RwIuYpZhggBTWefM9GPChx3d11y9deSmWqAR6NeyFu4K+zAU+owyIlPLCQ=="/>
+            <enclosure url="https://github.com/federicoBetti/powerwatt-mac-app/releases/download/v1.0.2/PowerWatt.zip" length="1884453" type="application/octet-stream" sparkle:edSignature="v95n5b05G+XkiJ/KSLiGOXNq2337RwIuYpZhggBTWefM9GPChx3d11y9deSmWqAR6NeyFu4K+zAU+owyIlPLCQ=="/>
         </item>
     </channel>
 </rss>

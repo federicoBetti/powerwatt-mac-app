@@ -84,7 +84,12 @@ jobs:
 
           # DMG for human-friendly download
           cp -R "$APP_PATH" "dmgroot/PowerWatt.app"
+          # Provide the usual drag-to-Applications install target
+          ln -s /Applications "dmgroot/Applications"
           hdiutil create -volname "PowerWatt" -srcfolder "dmgroot" -ov -format UDZO "dist/PowerWatt.dmg"
+
+          # PKG for one-click install into /Applications
+          pkgbuild --component "$APP_PATH" --install-location "/Applications" "dist/PowerWatt.pkg"
 
           # Appcast generation input
           cp "dist/PowerWatt.zip" "updates/PowerWatt.zip"
@@ -129,7 +134,8 @@ jobs:
           # Store that key string in the GitHub secret and write it directly to the file.
           printf '%s' "${SPARKLE_EDDSA_PRIVATE_KEY_BASE64}" > "$KEY_FILE"
 
-          DOWNLOAD_PREFIX="https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}"
+          # Must end with "/" or URL resolution will drop the tag component (Sparkle resolves relative paths)
+          DOWNLOAD_PREFIX="https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}/"
 
           "$SPARKLE_BIN/generate_appcast" \
             --ed-key-file "$KEY_FILE" \
@@ -155,6 +161,7 @@ jobs:
           tag_name: "${{ steps.version.outputs.tag }}"
           files: |
             dist/PowerWatt.dmg
+            dist/PowerWatt.pkg
             dist/PowerWatt.zip
 
       - name: Commit updated docs/appcast.xml

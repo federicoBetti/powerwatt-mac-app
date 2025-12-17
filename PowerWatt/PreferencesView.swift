@@ -86,6 +86,9 @@ struct PreferencesView: View {
                 Text("Updates are installed via Sparkle from the official appcast.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Text("For updates to work, PowerWatt must be installed in /Applications (not run from the DMG).")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Section("Privacy") {
