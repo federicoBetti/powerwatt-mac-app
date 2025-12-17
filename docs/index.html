@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description"
-    content="PowerWatt is a sleek macOS menu bar app that shows real-time battery power usage (IN/OUT watts) with customizable display modes." />
+    content="PowerWatt is a lightweight macOS menu bar app that shows real-time battery power usage (IN/OUT watts) with display modes that fit how you work." />
   <meta name="color-scheme" content="light dark" />
 
   <meta property="og:title" content="PowerWatt for macOS" />
@@ -18,36 +18,26 @@
 
   <style>
     :root {
-      --bg: #0b1020;
-      --panel: rgba(255, 255, 255, 0.06);
-      --panel2: rgba(255, 255, 255, 0.08);
-      --text: rgba(255, 255, 255, 0.92);
-      --muted: rgba(255, 255, 255, 0.72);
-      --border: rgba(255, 255, 255, 0.12);
-      --shadow: rgba(0, 0, 0, 0.35);
-      --link: #93c5fd;
-      --primary: #4f46e5;
-      --primaryText: #ffffff;
-      --success: #22c55e;
-      --danger: #ef4444;
-
-      --radius: 18px;
-      --radius2: 14px;
-      --container: 1120px;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #2563eb;
+      --accent-dark: #1e40af;
+      --radius: 16px;
+      --container: 960px;
     }
 
-    @media (prefers-color-scheme: light) {
+    @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #f6f7fb;
-        --panel: rgba(0, 0, 0, 0.04);
-        --panel2: rgba(0, 0, 0, 0.055);
-        --text: rgba(0, 0, 0, 0.90);
-        --muted: rgba(0, 0, 0, 0.64);
-        --border: rgba(0, 0, 0, 0.10);
-        --shadow: rgba(0, 0, 0, 0.12);
-        --link: #1d4ed8;
-        --primary: #4f46e5;
-        --primaryText: #ffffff;
+        --bg: #020617;
+        --surface: #0f172a;
+        --border: #1e293b;
+        --text: #f8fafc;
+        --muted: #cbd5f5;
+        --accent: #7dd3fc;
+        --accent-dark: #38bdf8;
       }
     }
 
@@ -55,25 +45,17 @@
       box-sizing: border-box;
     }
 
-    html,
-    body {
-      height: 100%;
-    }
-
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
       color: var(--text);
-      background:
-        radial-gradient(1100px 600px at 12% 10%, rgba(79, 70, 229, 0.34), transparent 58%),
-        radial-gradient(950px 520px at 92% 22%, rgba(14, 165, 233, 0.20), transparent 60%),
-        radial-gradient(900px 520px at 65% 92%, rgba(34, 197, 94, 0.12), transparent 56%),
-        var(--bg);
+      background: var(--bg);
+      line-height: 1.5;
     }
 
     a {
-      color: var(--link);
-      text-underline-offset: 3px;
+      color: var(--accent);
+      text-underline-offset: 0.3em;
     }
 
     .container {
@@ -86,7 +68,7 @@
       position: absolute;
       left: -999px;
       top: 10px;
-      background: var(--panel2);
+      background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text);
       padding: 10px 12px;
@@ -98,350 +80,280 @@
       left: 16px;
     }
 
-    .header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      backdrop-filter: blur(12px);
-      background: color-mix(in srgb, var(--bg) 70%, transparent);
+    .site-header {
+      background: var(--surface);
       border-bottom: 1px solid var(--border);
     }
 
-    .nav {
+    .header-inner {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding: 14px 0;
+      padding: 18px 0;
     }
 
     .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
       text-decoration: none;
       color: var(--text);
-      font-weight: 750;
+      font-weight: 700;
       letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand span {
+      font-size: 1rem;
     }
 
     .brand .dot {
       width: 10px;
       height: 10px;
       border-radius: 999px;
-      background: linear-gradient(135deg, rgba(79, 70, 229, 1), rgba(14, 165, 233, 1));
-      box-shadow: 0 10px 30px rgba(79, 70, 229, 0.35);
+      background: var(--accent);
     }
 
-    .navlinks {
+    .quick-nav {
       display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: flex-end;
+      gap: 18px;
+      font-size: 0.95rem;
     }
 
-    .navlinks a {
-      color: var(--muted);
+    .quick-nav a {
       text-decoration: none;
+      color: var(--muted);
       font-weight: 600;
-      font-size: 14px;
-      padding: 8px 10px;
-      border-radius: 10px;
     }
 
-    .navlinks a:hover {
+    .quick-nav a:hover {
       color: var(--text);
-      background: var(--panel);
+    }
+
+    main {
+      padding: 32px 0 48px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 32px;
+      align-items: center;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      padding: 32px 0 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.6rem, 4vw, 3.2rem);
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.8rem;
+      letter-spacing: -0.02em;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 1.1rem;
+    }
+
+    p {
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+
+    .lead {
+      font-size: 1.1rem;
+      margin-top: 14px;
+      color: var(--text);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--surface);
       border: 1px solid var(--border);
-      padding: 7px 9px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .hero-highlights {
+      list-style: none;
+      padding: 0;
+      margin: 18px 0 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .hero-highlights li {
+      display: flex;
+      gap: 8px;
+      color: var(--muted);
+    }
+
+    .hero-highlights li::before {
+      content: "•";
+      color: var(--accent);
+    }
+
+    .cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      background: var(--primary);
-      color: var(--primaryText);
+      gap: 8px;
+      padding: 12px 18px;
+      border-radius: 999px;
       text-decoration: none;
-      font-weight: 750;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      box-shadow: 0 12px 30px rgba(79, 70, 229, 0.22);
-      transition: transform 90ms ease, box-shadow 90ms ease;
+      font-weight: 700;
+      background: var(--accent);
+      color: #fff;
+      border: 1px solid transparent;
+      transition: background 120ms ease;
     }
 
     .btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 16px 34px rgba(79, 70, 229, 0.28);
+      background: var(--accent-dark);
     }
 
     .btn.secondary {
       background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-      box-shadow: none;
-    }
-
-    .btn.secondary:hover {
-      box-shadow: 0 12px 24px var(--shadow);
-    }
-
-    .btn.small {
-      padding: 10px 12px;
-      border-radius: 11px;
-      font-size: 14px;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      background: var(--panel);
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 650;
-      white-space: nowrap;
-    }
-
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 22px 56px rgba(0, 0, 0, 0.12);
-    }
-
-    main {
-      padding: 26px 0 44px;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 24px;
-      align-items: start;
-      padding: 30px 0 12px;
-    }
-
-    @media (max-width: 960px) {
-      .hero {
-        grid-template-columns: 1fr;
-      }
-
-      .nav {
-        align-items: flex-start;
-      }
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 52px;
-      letter-spacing: -0.035em;
-      line-height: 1.05;
-    }
-
-    @media (max-width: 520px) {
-      h1 {
-        font-size: 42px;
-      }
-    }
-
-    h2 {
-      margin: 0 0 10px;
-      font-size: 26px;
-      letter-spacing: -0.02em;
-    }
-
-    h3 {
-      margin: 0 0 8px;
-      font-size: 16px;
-      letter-spacing: -0.01em;
-    }
-
-    p {
-      margin: 0 0 12px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .lead {
-      font-size: 18px;
-      line-height: 1.55;
-      margin-top: 12px;
-    }
-
-    .cta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 16px;
-      align-items: center;
-    }
-
-    .muted {
-      color: var(--muted);
+      color: var(--accent);
+      border-color: var(--accent);
     }
 
     .fine {
-      font-size: 13px;
+      font-size: 0.85rem;
       color: var(--muted);
     }
 
     .hero-media {
-      padding: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 16px;
+      border-radius: var(--radius);
     }
 
     .shot {
       width: 100%;
       height: auto;
-      border-radius: 14px;
+      border-radius: 12px;
       border: 1px solid var(--border);
-      box-shadow: 0 18px 50px var(--shadow);
       display: block;
     }
 
-    .caption {
-      margin-top: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      justify-content: space-between;
-    }
-
     .section {
-      padding: 28px 0;
+      padding: 30px 0;
     }
 
-    .grid {
+    .section p.intro {
+      max-width: 620px;
+    }
+
+    .feature-list {
       display: grid;
-      gap: 14px;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      margin-top: 24px;
     }
 
-    .grid.two {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .grid.three {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    @media (max-width: 900px) {
-
-      .grid.two,
-      .grid.three {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .feature {
-      display: grid;
-      gap: 8px;
-      padding: 16px;
-      border-radius: var(--radius2);
-      background: var(--panel2);
+    .feature-list article {
+      background: var(--surface);
       border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      min-height: 160px;
     }
 
-    .feature .kicker {
-      font-size: 13px;
-      font-weight: 750;
-      letter-spacing: 0.02em;
-      color: color-mix(in srgb, var(--muted) 90%, transparent);
-      text-transform: uppercase;
-    }
-
-    .feature p {
+    .feature-list p {
       margin: 0;
-      font-size: 14px;
     }
 
-    ol,
-    ul {
-      margin: 10px 0 0 20px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    code {
-      background: color-mix(in srgb, var(--panel2) 70%, transparent);
+    .install-steps {
+      background: var(--surface);
       border: 1px solid var(--border);
-      padding: 2px 6px;
-      border-radius: 8px;
-      font-size: 0.95em;
-    }
-
-    .callout {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .callout strong {
-      color: var(--text);
-    }
-
-    .footer {
+      border-radius: var(--radius);
+      padding: 18px 24px;
       margin-top: 18px;
-      padding: 26px 0 38px;
-      border-top: 1px solid var(--border);
     }
 
-    .footergrid {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 14px;
-      align-items: start;
-    }
-
-    @media (max-width: 860px) {
-      .footergrid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .footer a {
+    .install-steps ol {
+      padding-left: 20px;
+      margin: 0;
       color: var(--muted);
-      text-decoration: none;
     }
 
-    .footer a:hover {
+    .info-box {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: var(--radius);
+      border: 1px dashed var(--border);
+      color: var(--muted);
+      background: color-mix(in srgb, var(--surface) 70%, transparent);
+    }
+
+    .privacy-card,
+    .release-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-top: 18px;
+    }
+
+    .release-card h3 {
+      margin-bottom: 4px;
+    }
+
+    .release-meta {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .faq {
+      margin-top: 20px;
+      display: grid;
+      gap: 12px;
+    }
+
+    details {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      background: var(--surface);
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
       color: var(--text);
-      text-decoration: underline;
-      text-underline-offset: 3px;
     }
 
-    .kpis {
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 0 40px;
+      margin-top: 20px;
+      color: var(--muted);
+    }
+
+    footer .footer-links {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .kpi {
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--panel);
-    }
-
-    .kpi .big {
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      color: var(--text);
-    }
-
-    .kpi .small {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 2px;
+      gap: 14px;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -449,22 +361,17 @@
 <body>
   <a class="skip" href="#content">Skip to content</a>
 
-  <header class="header">
-    <div class="container nav">
+  <header class="site-header">
+    <div class="container header-inner">
       <a class="brand" href="index.html" aria-label="PowerWatt">
         <span class="dot" aria-hidden="true"></span>
         <span>PowerWatt</span>
       </a>
-
-      <nav class="navlinks" aria-label="Primary">
+      <nav class="quick-nav" aria-label="Site">
         <a href="#features">Features</a>
-        <a href="#install">Install</a>
-        <a href="#privacy">Privacy</a>
-        <a href="#faq">FAQ</a>
+        <a href="#changelog">Change log</a>
         <a href="https://github.com/federicoBetti/powerwatt-mac-app" rel="noreferrer">GitHub</a>
       </nav>
-
-      <a class="btn small" href="#download">Download</a>
     </div>
   </header>
 
@@ -472,10 +379,17 @@
     <div class="container">
       <section class="hero">
         <div>
+          <span class="tag">Menu bar utility · macOS 15.2+</span>
           <h1>Know your Mac’s real power draw.</h1>
-          <p class="lead">PowerWatt is a lightweight macOS menu bar app that shows battery power usage in real time—
-            <strong>IN/OUT watts</strong>, with display modes that fit how you work.
-          </p>
+          <p class="lead">PowerWatt shows real-time battery power usage—IN or OUT watts—without clutter. Pick the
+            display
+            style that fits your workflow and leave it running in the menu bar.</p>
+
+          <ul class="hero-highlights">
+            <li>Instant net watts or separate IN/OUT readings</li>
+            <li>Smoothing + refresh controls to tame noisy spikes</li>
+            <li>Telemetry is optional and off unless you opt in</li>
+          </ul>
 
           <div class="cta" id="download">
             <a id="download-dmg" class="btn"
@@ -487,187 +401,124 @@
             <a id="download-zip" class="btn secondary"
               href="https://github.com/federicoBetti/powerwatt-mac-app/releases/latest/download/PowerWatt.zip">Download
               ZIP</a>
-            <span class="pill">Latest GitHub Release</span>
           </div>
-
-          <p class="fine" style="margin-top: 10px;">Requires <strong>macOS 15.2+</strong>. Runs in the menu bar (no Dock
-            icon).</p>
-
-          <div class="kpis" aria-label="Highlights">
-            <div class="kpi">
-              <div class="big">Net or IN/OUT</div>
-              <div class="small">Two display modes</div>
-            </div>
-            <div class="kpi">
-              <div class="big">Smoothing</div>
-              <div class="small">Reduce flicker</div>
-            </div>
-            <div class="kpi">
-              <div class="big">Privacy-first</div>
-              <div class="small">Telemetry off by default</div>
-            </div>
-          </div>
+          <p class="fine">Runs in the menu bar only—no Dock icon, no distractions.</p>
         </div>
-
-        <div class="card hero-media">
-          <img class="shot" src="assets/powerwatt-screenshot.png" alt="PowerWatt download page screenshot" />
-          <div class="caption">
-            <span class="fine">Screenshot: PowerWatt download page</span>
-            <span class="pill">Download + install notes</span>
-          </div>
+        <div class="hero-media">
+          <img class="shot" src="assets/powerwatt-screenshot.png" alt="PowerWatt screenshot" />
         </div>
       </section>
 
       <section id="features" class="section">
-        <h2>Features</h2>
-        <p class="muted">A focused tool that does one thing well: show power direction + watts, always visible.</p>
+        <h2>Core features</h2>
+        <p class="intro">PowerWatt keeps the interface calm while still surfacing the controls you need most often.</p>
 
         <!-- Keep this list updated when shipping user-facing features (see .cursor/rules). -->
-        <div class="grid three" style="margin-top: 14px;">
-          <div class="feature">
-            <div class="kicker">Real-time watts</div>
-            <h3>Battery power usage (IN/OUT)</h3>
-            <p>Shows charging vs discharging watts using system battery readings.</p>
-          </div>
-          <div class="feature">
-            <div class="kicker">Display modes</div>
-            <h3>Net-only or separate IN/OUT</h3>
-            <p>Pick “Net Only (IN−OUT)” or “Separate IN and OUT” depending on your workflow.</p>
-          </div>
-          <div class="feature">
-            <div class="kicker">Readable at a glance</div>
-            <h3>Label styles + colors</h3>
-            <p>Choose icon+watts, watts-only, or prefix+watts—optionally color-coded.</p>
-          </div>
-          <div class="feature">
-            <div class="kicker">Control</div>
-            <h3>Refresh rate</h3>
-            <p>Adjust polling frequency (1–60 seconds) to balance responsiveness and noise.</p>
-          </div>
-          <div class="feature">
-            <div class="kicker">Stability</div>
-            <h3>Smoothing window</h3>
-            <p>Average readings over a short window (0–30 seconds) to reduce flicker.</p>
-          </div>
-          <div class="feature">
-            <div class="kicker">System integration</div>
-            <h3>Open at login + updates</h3>
-            <p>Start automatically and install updates via Sparkle from the official appcast.</p>
-          </div>
-        </div>
-
-        <div class="card callout" style="margin-top: 14px;">
-          <strong>Tip:</strong>
-          <p class="muted" style="margin: 0;">If you’re profiling battery drain, try enabling “Separate IN and OUT”,
-            then
-            set a short refresh interval and a small smoothing window.</p>
+        <div class="feature-list">
+          <article>
+            <h3>Real-time battery watts</h3>
+            <p>Reads system voltage and current directly from macOS to show accurate IN vs OUT wattage.</p>
+          </article>
+          <article>
+            <h3>Two display modes</h3>
+            <p>Pick a net view (IN−OUT) or separate IN and OUT labels for detailed profiling.</p>
+          </article>
+          <article>
+            <h3>Smoothing controls</h3>
+            <p>Adjust refresh rate (1–60 s) and smoothing windows (0–30 s) to reduce flicker.</p>
+          </article>
+          <article>
+            <h3>Menu bar styles</h3>
+            <p>Choose icon + watts, watts only, or prefix + watts—optionally color-coded for direction.</p>
+          </article>
+          <article>
+            <h3>Start at login</h3>
+            <p>Keep PowerWatt pinned in your menu bar and let Sparkle manage future updates.</p>
+          </article>
+          <article>
+            <h3>Privacy-first</h3>
+            <p>No telemetry is sent unless you explicitly opt in. You can flip the switch anytime.</p>
+          </article>
         </div>
       </section>
 
       <section id="install" class="section">
-        <h2>Install</h2>
-        <div class="grid two" style="margin-top: 14px;">
-          <div class="card">
-            <h3>Quick install</h3>
-            <ol>
-              <li><strong>Recommended:</strong> Download <code>PowerWatt.pkg</code> and run it to install into
-                <code>/Applications</code>.
-              </li>
-              <li><strong>Alternative:</strong> Download <code>PowerWatt.dmg</code>, open it, then drag
-                <code>PowerWatt.app</code> into <code>Applications</code>.
-              </li>
-              <li>Launch PowerWatt. It appears in the menu bar.</li>
-            </ol>
-          </div>
-          <div class="card">
-            <h3>First launch notes</h3>
-            <ul>
-              <li>If macOS blocks the app, right-click <code>PowerWatt.app</code> → <strong>Open</strong>.</li>
-              <li>Preferences are available from the menu bar dropdown.</li>
-              <li>Updates require installing into <code>/Applications</code> (don’t run from the DMG).</li>
-              <li>For best “Open at Login” behavior, keep the app in <code>/Applications</code>.</li>
-            </ul>
-          </div>
+        <h2>Install in two steps</h2>
+        <div class="install-steps">
+          <ol>
+            <li>Download the <code>PowerWatt.pkg</code> (recommended) or <code>PowerWatt.dmg</code>.</li>
+            <li>Install into <code>/Applications</code>, launch the app, and open preferences from the menu bar.</li>
+          </ol>
+        </div>
+        <div class="info-box">
+          If macOS blocks the first launch, right-click <code>PowerWatt.app</code> and choose <strong>Open</strong>.
+          Leave it in <code>/Applications</code> for smooth updates and automatic “Open at Login” behavior.
         </div>
       </section>
 
       <section id="privacy" class="section">
         <h2>Privacy-first by design</h2>
-        <div class="grid two" style="margin-top: 14px;">
-          <div class="card">
-            <h3>Off by default</h3>
-            <p>Anonymous usage stats are optional. On first launch, PowerWatt asks if you want to share anonymous
-              telemetry to help prioritize improvements.</p>
-            <p class="fine">You can enable/disable it at any time in Preferences.</p>
-          </div>
-          <div class="card">
-            <h3>Transparent details</h3>
-            <p>See exactly what is (and isn’t) collected, how consent works, and how to opt out.</p>
-            <div class="cta" style="margin-top: 8px;">
-              <a class="btn secondary" href="privacy.html">Read the privacy details</a>
-            </div>
-          </div>
+        <div class="privacy-card">
+          <p>Anonymous usage stats stay <strong>off by default</strong>. When you first launch PowerWatt you can opt in
+            (or not), and the toggle remains available later in Preferences.</p>
+          <p class="fine"><a href="privacy.html">Read the full privacy note</a> for the exact data sent when telemetry
+            is
+            enabled.</p>
         </div>
       </section>
 
-      <section id="faq" class="section">
-        <h2>FAQ</h2>
-        <div class="grid two" style="margin-top: 14px;">
-          <div class="card">
-            <h3>How does PowerWatt calculate watts?</h3>
-            <p>It reads battery voltage (mV) and current (mA) from macOS and computes watts as
-              <code>(voltage × current) / 1,000,000</code>.
-            </p>
+      <section id="changelog" class="section">
+        <h2>Change log</h2>
+        <p class="intro">Stay in the loop as we ship refinements to the menu bar experience.</p>
+        <article class="release-card">
+          <h3>PowerWatt v1.0.2</h3>
+          <p class="release-meta">December 17, 2025 · Requires macOS 15.2+</p>
+          <p>This is the build currently served by the Sparkle updater feed. Grab it directly or let the app update
+            itself from the in-app menu.</p>
+          <div class="cta">
+            <a class="btn" href="https://github.com/federicoBetti/powerwatt-mac-app/releases/latest"
+              rel="noreferrer">Read release notes</a>
+            <a class="btn secondary" href="appcast.xml">Sparkle appcast</a>
           </div>
-          <div class="card">
-            <h3>Why do values sometimes jump?</h3>
-            <p>Short spikes are normal when your Mac changes CPU/GPU load. Use the smoothing window to average readings
-              and reduce flicker.</p>
-          </div>
-          <div class="card">
-            <h3>Does it work on desktops?</h3>
-            <p>PowerWatt reads battery data, so it’s intended for Macs with a battery.</p>
-          </div>
-          <div class="card">
-            <h3>Where can I report issues?</h3>
-            <p>Please open an issue on GitHub with your macOS version and what you expected to see.</p>
-            <p class="fine"><a href="https://github.com/federicoBetti/powerwatt-mac-app/issues" rel="noreferrer">Open an
-                issue</a></p>
-          </div>
+        </article>
+        <p class="fine">Need an older version? Browse the <a
+            href="https://github.com/federicoBetti/powerwatt-mac-app/releases" rel="noreferrer">full release history on
+            GitHub</a>.</p>
+      </section>
+
+      <section class="section">
+        <h2>Quick answers</h2>
+        <div class="faq">
+          <details>
+            <summary>How does PowerWatt calculate watts?</summary>
+            <p>Battery voltage (mV) × current (mA) ÷ 1,000,000 gives watts. PowerWatt reads those values directly from
+              macOS.</p>
+          </details>
+          <details>
+            <summary>Why do values sometimes jump?</summary>
+            <p>Short spikes are normal as macOS shifts CPU/GPU load. Lower the refresh interval or enable smoothing to
+              average them out.</p>
+          </details>
+          <details>
+            <summary>Does it work on desktops?</summary>
+            <p>PowerWatt relies on battery stats, so it’s intended for Macs with a battery.</p>
+          </details>
+          <details>
+            <summary>Where do I report issues?</summary>
+            <p><a href="https://github.com/federicoBetti/powerwatt-mac-app/issues" rel="noreferrer">Open an issue on
+                GitHub</a> with your macOS version and what you expected to see.</p>
+          </details>
         </div>
       </section>
 
-      <section class="section" style="padding-top: 10px;">
-        <div class="card"
-          style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;">
-          <div>
-            <h3 style="margin: 0 0 6px;">Ready to try it?</h3>
-            <p style="margin: 0;" class="muted">Download the latest release and pin real-time watts to your menu bar.
-            </p>
-          </div>
-          <div class="cta" style="margin: 0;">
-            <a class="btn" href="#download">Download</a>
-            <a class="btn secondary" href="https://github.com/federicoBetti/powerwatt-mac-app/releases"
-              rel="noreferrer">All
-              releases</a>
-          </div>
-        </div>
-      </section>
-
-      <footer class="footer">
-        <div class="footergrid">
-          <div>
-            <div style="font-weight: 800; letter-spacing: -0.02em;">© PowerWatt</div>
-            <div class="fine" style="margin-top: 6px;">Open-source macOS utility • Built for quick, accurate power
-              visibility.</div>
-          </div>
-          <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:flex-end;">
-            <a href="privacy.html">Privacy</a>
-            <a href="appcast.xml">Appcast</a>
-            <a href="https://github.com/federicoBetti/powerwatt-mac-app" rel="noreferrer">Source</a>
-            <a href="https://github.com/federicoBetti/powerwatt-mac-app/releases/latest" rel="noreferrer">Latest
-              release</a>
-          </div>
+      <footer>
+        <div>© PowerWatt — Open-source macOS utility built for quick, accurate power visibility.</div>
+        <div class="footer-links">
+          <a href="privacy.html">Privacy</a>
+          <a href="appcast.xml">Appcast</a>
+          <a href="https://github.com/federicoBetti/powerwatt-mac-app" rel="noreferrer">Source</a>
+          <a href="https://github.com/federicoBetti/powerwatt-mac-app/releases/latest" rel="noreferrer">Latest
+            release</a>
         </div>
       </footer>
     </div>
