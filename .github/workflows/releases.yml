@@ -126,12 +126,12 @@ jobs:
 
           KEY_FILE="sparkle_ed25519_private_key"
           python3 - <<'PY'
-import base64, os
-key_b64 = os.environ.get('SPARKLE_EDDSA_PRIVATE_KEY_BASE64', '')
-raw = base64.b64decode(key_b64)
-with open('sparkle_ed25519_private_key', 'wb') as f:
-    f.write(raw)
-PY
+          import base64, os
+          key_b64 = os.environ.get('SPARKLE_EDDSA_PRIVATE_KEY_BASE64', '')
+          raw = base64.b64decode(key_b64)
+          with open('sparkle_ed25519_private_key', 'wb') as f:
+              f.write(raw)
+          PY
 
           DOWNLOAD_PREFIX="https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}"
 
