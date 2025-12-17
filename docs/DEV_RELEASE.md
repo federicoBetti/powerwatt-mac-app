@@ -47,7 +47,7 @@ The workflow commits the generated Sparkle appcast back to `docs/appcast.xml` on
    ```
 
 ## 5. Common failure modes
-- **Workflow fails on `generate_appcast`**: ensure the `SPARKLE_EDDSA_PRIVATE_KEY_BASE64` secret is set and matches the public key in `Info.plist`.
+- **Workflow fails on `generate_appcast`**: ensure the `SPARKLE_EDDSA_PRIVATE_KEY_BASE64` secret is set to the one-line private key produced by `generate_keys -x` and that it matches the public key in `Info.plist`.
 - **Release missing assets**: confirm the workflow reached the "Create GitHub Release" step and that `softprops/action-gh-release` had permission (`contents: write`).
 - **Pages still serves an old appcast**: the commit to `main` may have been rejected. Check the workflow logs for the `git-auto-commit-action` step and rerun if necessary.
 - **Sparkle test feed ignored**: the debug override only works in Debug builds and requires a valid `http` or `https` URL. Check the override value with `defaults read com.fbetti44.PowerWatt debug_appcast_url`.

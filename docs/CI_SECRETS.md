@@ -13,15 +13,11 @@ Sparkle update ZIPs must be signed with the private Ed25519 key that pairs with 
    generate_keys -x
    ```
    - The first command prints the public key (already stored in `Info.plist`).
-   - The `-x` flag writes the private key to `sparkle_private_key_ed25519.pem`.
-2. Base64-encode the private key file:
-   ```bash
-   base64 sparkle_private_key_ed25519.pem | tr -d '\n'
-   ```
-3. In the GitHub repository settings → **Secrets and variables** → **Actions**, create a new secret named `SPARKLE_EDDSA_PRIVATE_KEY_BASE64` and paste the single-line base64 string.
+   - The `-x` flag writes the private key as a **single-line base64 string** to `sparkle_private_key_ed25519.pem`.
+2. In the GitHub repository settings → **Secrets and variables** → **Actions**, create a new secret named `SPARKLE_EDDSA_PRIVATE_KEY_BASE64` and paste the **contents of** `sparkle_private_key_ed25519.pem` (the one-line base64 key).
 4. Delete the plaintext private key file after uploading the secret.
 
-The workflow decodes this secret into a temporary file (see the "Generate appcast" step) and removes it immediately after generating `docs/appcast.xml`.
+The workflow writes this secret into a temporary file (see the "Generate appcast" step) and removes it immediately after generating `docs/appcast.xml`.
 
 #### Rotation
 - Re-run `generate_keys` to create a new keypair.
