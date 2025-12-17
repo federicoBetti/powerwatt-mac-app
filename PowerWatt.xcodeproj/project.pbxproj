@@ -195,6 +195,10 @@
 			);
 			mainGroup = 9A4CE9752E462E6B001A9D76;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9AC0B1A42EF358760062F77F /* XCRemoteSwiftPackageReference "Sparkle" */,
+				9AC0B1A52EF358AD0062F77F /* XCRemoteSwiftPackageReference "posthog-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9A4CE97F2E462E6B001A9D76 /* Products */;
 			projectDirPath = "";
@@ -543,6 +547,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9AC0B1A42EF358760062F77F /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.8.1;
+			};
+		};
+		9AC0B1A52EF358AD0062F77F /* XCRemoteSwiftPackageReference "posthog-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/PostHog/posthog-ios.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.36.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = 9A4CE9762E462E6B001A9D76 /* Project object */;
 }
