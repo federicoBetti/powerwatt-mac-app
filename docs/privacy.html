@@ -4,46 +4,130 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description"
+    content="PowerWatt privacy details: what telemetry is collected (optional), how consent works, and how to opt out." />
+  <meta name="color-scheme" content="light dark" />
   <title>PowerWatt • Privacy</title>
+
   <style>
     :root {
       --bg: #0b1020;
-      --card: rgba(255, 255, 255, 0.06);
+      --panel: rgba(255, 255, 255, 0.06);
+      --panel2: rgba(255, 255, 255, 0.08);
       --text: rgba(255, 255, 255, 0.92);
-      --muted: rgba(255, 255, 255, 0.70);
+      --muted: rgba(255, 255, 255, 0.72);
       --border: rgba(255, 255, 255, 0.12);
+      --shadow: rgba(0, 0, 0, 0.35);
       --link: #93c5fd;
+      --primary: #4f46e5;
+      --primaryText: #ffffff;
+      --radius: 18px;
+      --container: 980px;
     }
 
     @media (prefers-color-scheme: light) {
       :root {
         --bg: #f6f7fb;
-        --card: rgba(0, 0, 0, 0.04);
+        --panel: rgba(0, 0, 0, 0.04);
+        --panel2: rgba(0, 0, 0, 0.055);
         --text: rgba(0, 0, 0, 0.90);
-        --muted: rgba(0, 0, 0, 0.62);
+        --muted: rgba(0, 0, 0, 0.64);
         --border: rgba(0, 0, 0, 0.10);
+        --shadow: rgba(0, 0, 0, 0.12);
         --link: #1d4ed8;
+        --primary: #4f46e5;
+        --primaryText: #ffffff;
       }
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial;
-      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
       color: var(--text);
+      background:
+        radial-gradient(1100px 600px at 12% 10%, rgba(79, 70, 229, 0.30), transparent 58%),
+        radial-gradient(950px 520px at 92% 22%, rgba(14, 165, 233, 0.16), transparent 60%),
+        var(--bg);
     }
 
-    .wrap {
-      max-width: 860px;
+    a {
+      color: var(--link);
+      text-underline-offset: 3px;
+    }
+
+    .container {
+      max-width: var(--container);
       margin: 0 auto;
-      padding: 48px 20px;
+      padding: 0 20px;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(12px);
+      background: color-mix(in srgb, var(--bg) 70%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 0;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 750;
+      letter-spacing: -0.02em;
+    }
+
+    .brand .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(79, 70, 229, 1), rgba(14, 165, 233, 1));
+      box-shadow: 0 10px 30px rgba(79, 70, 229, 0.35);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 750;
+      border: 1px solid var(--border);
+    }
+
+    .btn:hover {
+      background: var(--panel);
+    }
+
+    main {
+      padding: 26px 0 44px;
     }
 
     .card {
-      background: var(--card);
+      background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: var(--radius);
       padding: 22px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 22px 56px rgba(0, 0, 0, 0.12);
     }
 
     h1 {
@@ -53,81 +137,98 @@
     }
 
     h2 {
-      margin: 20px 0 8px;
+      margin: 18px 0 8px;
       font-size: 18px;
+      letter-spacing: -0.01em;
     }
 
     p,
     li {
       color: var(--muted);
-      line-height: 1.55;
-    }
-
-    a {
-      color: var(--link);
+      line-height: 1.6;
     }
 
     code {
-      background: rgba(255, 255, 255, 0.10);
+      background: color-mix(in srgb, var(--panel2) 70%, transparent);
+      border: 1px solid var(--border);
       padding: 2px 6px;
-      border-radius: 6px;
+      border-radius: 8px;
+      font-size: 0.95em;
+    }
+
+    .fine {
+      font-size: 13px;
+      color: var(--muted);
     }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="card">
-      <p><a href="index.html">← Back to download</a></p>
-      <h1>Privacy</h1>
-      <p>PowerWatt can optionally send anonymous usage statistics to help improve the app. This is <b>off by
-          default</b>.</p>
-
-      <h2>Consent</h2>
-      <ul>
-        <li>Telemetry is disabled by default.</li>
-        <li>On first launch, PowerWatt asks if you want to share anonymous usage stats.</li>
-        <li>You can enable/disable telemetry at any time in Preferences.</li>
-      </ul>
-
-      <h2>What we collect (minimal, anonymous)</h2>
-      <p>When enabled, PowerWatt may send events such as:</p>
-      <ul>
-        <li><code>app_first_launch</code></li>
-        <li><code>app_launch</code></li>
-        <li><code>view_opened</code> (e.g. Preferences)</li>
-        <li><code>setting_changed</code> (setting name and a bucketed value)</li>
-        <li><code>feature_used</code> (feature name)</li>
-        <li><code>error_nonfatal</code> (error domain/code and short context)</li>
-      </ul>
-
-      <p>Events include a random <code>install_id</code> and basic app/device context:</p>
-      <ul>
-        <li>App version and build number</li>
-        <li>macOS version</li>
-        <li>Locale (language/region)</li>
-      </ul>
-
-      <h2>What we do NOT collect</h2>
-      <ul>
-        <li>No name, email address, or account identifiers</li>
-        <li>No macOS username, computer name, or serial number</li>
-        <li>No precise location data</li>
-        <li>No session replay</li>
-      </ul>
-
-      <h2>Processor / hosting</h2>
-      <p>Telemetry is processed by PostHog Cloud (EU region). The endpoint used is
-        <code>https://eu.i.posthog.com</code>.</p>
-
-      <h2>How to opt out</h2>
-      <p>Open PowerWatt Preferences and turn off “Share anonymous usage stats”. When disabled, PowerWatt does not
-        initialize telemetry and does not send events.</p>
-
-      <h2>Contact</h2>
-      <p>If you have questions, open an issue on the project repository.</p>
+  <header class="header">
+    <div class="container nav">
+      <a class="brand" href="index.html" aria-label="PowerWatt">
+        <span class="dot" aria-hidden="true"></span>
+        <span>PowerWatt</span>
+      </a>
+      <a class="btn" href="index.html">Back to download</a>
     </div>
-  </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="card">
+        <h1>Privacy</h1>
+        <p>PowerWatt can optionally send anonymous usage statistics to help improve the app. This is <b>off by
+            default</b>.</p>
+
+        <h2>Consent</h2>
+        <ul>
+          <li>Telemetry is disabled by default.</li>
+          <li>On first launch, PowerWatt asks if you want to share anonymous usage stats.</li>
+          <li>You can enable/disable telemetry at any time in Preferences.</li>
+        </ul>
+
+        <h2>What we collect (minimal, anonymous)</h2>
+        <p>When enabled, PowerWatt may send events such as:</p>
+        <ul>
+          <li><code>app_first_launch</code></li>
+          <li><code>app_launch</code></li>
+          <li><code>view_opened</code> (e.g. Preferences)</li>
+          <li><code>setting_changed</code> (setting name and a bucketed value)</li>
+          <li><code>feature_used</code> (feature name)</li>
+          <li><code>error_nonfatal</code> (error domain/code and short context)</li>
+        </ul>
+
+        <p>Events include a random <code>install_id</code> and basic app/device context:</p>
+        <ul>
+          <li>App version and build number</li>
+          <li>macOS version</li>
+          <li>Locale (language/region)</li>
+        </ul>
+
+        <h2>What we do NOT collect</h2>
+        <ul>
+          <li>No name, email address, or account identifiers</li>
+          <li>No macOS username, computer name, or serial number</li>
+          <li>No precise location data</li>
+          <li>No session replay</li>
+        </ul>
+
+        <h2>Processor / hosting</h2>
+        <p>Telemetry is processed by PostHog Cloud (EU region). The endpoint used is
+          <code>https://eu.i.posthog.com</code>.
+        </p>
+
+        <h2>How to opt out</h2>
+        <p>Open PowerWatt Preferences and turn off “Share anonymous usage stats”. When disabled, PowerWatt does not
+          initialize telemetry and does not send events.</p>
+
+        <h2>Contact</h2>
+        <p>If you have questions, open an issue on the project repository.</p>
+        <p class="fine">You can also read the source on GitHub to verify behavior.</p>
+      </div>
+    </div>
+  </main>
 </body>
 
 </html>

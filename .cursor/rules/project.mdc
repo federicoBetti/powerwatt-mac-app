@@ -1,0 +1,14 @@
+# Project rules (PowerWatt)
+
+## Website / GitHub Pages sync
+
+- When shipping a **user-facing feature** (new behavior, setting, UI option, menu item, update mechanism, privacy/telemetry change), update the public download site.
+- The download site lives in `docs/`:
+  - `docs/index.html`: update the **Features** section (`#features`) to include the new feature (or adjust wording if behavior changed).
+  - `docs/privacy.html`: update if the change impacts telemetry, consent, data collected, or hosting.
+- Do not promise features the app does not have (keep wording accurate to the current code).
+- Prefer adding features as new cards/bullets rather than rewriting existing ones, unless the old text became incorrect.
+
+## Releases
+
+- If a change is mentioned in release notes or README “Features”, ensure the website’s feature list remains consistent.
