@@ -125,13 +125,9 @@ jobs:
           fi
 
           KEY_FILE="sparkle_ed25519_private_key"
-          python3 - <<'PY'
-          import base64, os
-          key_b64 = os.environ.get('SPARKLE_EDDSA_PRIVATE_KEY_BASE64', '')
-          raw = base64.b64decode(key_b64)
-          with open('sparkle_ed25519_private_key', 'wb') as f:
-              f.write(raw)
-          PY
+          # Sparkle expects the EdDSA private key file to be a UTF-8 string (as produced by `generate_keys -x`).
+          # Store that key string in the GitHub secret and write it directly to the file.
+          printf '%s' "${SPARKLE_EDDSA_PRIVATE_KEY_BASE64}" > "$KEY_FILE"
 
           DOWNLOAD_PREFIX="https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}"
 
