@@ -1,15 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
-  <channel>
-    <title>PowerWatt Updates</title>
-    <link>https://federicoBetti.github.io/powerwatt-mac-app/</link>
-    <description>PowerWatt appcast</description>
-    <language>en</language>
-
-    <!--
-      This file is intentionally a placeholder.
-      It will be overwritten on each tagged release by CI.
-    -->
-
-  </channel>
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>PowerWatt</title>
+        <item>
+            <title>1.0.2</title>
+            <pubDate>Wed, 17 Dec 2025 22:56:57 +0000</pubDate>
+            <sparkle:version>3</sparkle:version>
+            <sparkle:shortVersionString>1.0.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.2</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/federicoBetti/powerwatt-mac-app/releases/download/PowerWatt.zip" length="1884453" type="application/octet-stream" sparkle:edSignature="v95n5b05G+XkiJ/KSLiGOXNq2337RwIuYpZhggBTWefM9GPChx3d11y9deSmWqAR6NeyFu4K+zAU+owyIlPLCQ=="/>
+        </item>
+    </channel>
 </rss>
