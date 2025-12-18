@@ -14,14 +14,18 @@ struct PowerWattApp: App {
     @StateObject private var settings = AppSettings.shared
     @StateObject private var powerService = BatteryPowerService()
     @StateObject private var updaterManager = UpdaterManager()
+    @StateObject private var usageManager = UsageManager.shared
     private let telemetryManager = TelemetryManager.shared
+    
+    @State private var showUsageWindow = false
 
     var body: some Scene {
         MenuBarExtra {
-            MenuContentView()
+            MenuContentView(showUsageWindow: $showUsageWindow)
                 .environmentObject(settings)
                 .environmentObject(powerService)
                 .environmentObject(updaterManager)
+                .environmentObject(usageManager)
                 .environmentObject(telemetryManager)
         } label: {
             MenuBarLabelView()
@@ -36,9 +40,20 @@ struct PowerWattApp: App {
                 .environmentObject(settings)
                 .environmentObject(powerService)
                 .environmentObject(updaterManager)
+                .environmentObject(usageManager)
                 .environmentObject(telemetryManager)
-                .frame(width: 480, height: 500)
+                .frame(width: 500, height: 600)
         }
+        
+        // Usage Window
+        Window("Power Usage", id: "usage") {
+            UsageView()
+                .environmentObject(settings)
+                .environmentObject(usageManager)
+                .environmentObject(telemetryManager)
+        }
+        .defaultSize(width: 650, height: 700)
+        .windowResizability(.contentSize)
     }
 }
 
@@ -233,10 +248,15 @@ private struct MenuBarLabelView: View {
 }
 
 private struct MenuContentView: View {
+    @Binding var showUsageWindow: Bool
+    
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var powerService: BatteryPowerService
     @EnvironmentObject var updaterManager: UpdaterManager
+    @EnvironmentObject var usageManager: UsageManager
     @EnvironmentObject var telemetryManager: TelemetryManager
+    
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -273,6 +293,17 @@ private struct MenuContentView: View {
             }
 
             Divider()
+            
+            // Usage button
+            Button {
+                telemetryManager.capture(event: "feature_used", properties: ["feature_name": "usage_view", "context": "menu"])
+                openWindow(id: "usage")
+            } label: {
+                HStack {
+                    Image(systemName: "chart.bar.fill")
+                    Text("Power Usage…")
+                }
+            }
 
             Button("Check for Updates…") {
                 telemetryManager.capture(event: "feature_used", properties: ["feature_name": "check_for_updates", "context": "menu"])
@@ -289,6 +320,7 @@ private struct MenuContentView: View {
                 }
             }
             Button("Quit PowerWatt") {
+                usageManager.handleAppTermination()
                 NSApp.terminate(nil)
             }
         }
@@ -297,6 +329,10 @@ private struct MenuContentView: View {
         .frame(minWidth: 300)
         .onAppear {
             powerService.startPolling(intervalSeconds: settings.refreshIntervalSeconds)
+            // Start usage tracking if enabled
+            if settings.usageTrackingEnabled && !usageManager.isRunning {
+                usageManager.start()
+            }
         }
     }
 }
