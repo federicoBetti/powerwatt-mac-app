@@ -387,6 +387,7 @@
 
           <ul class="hero-highlights">
             <li>Instant net watts or separate IN/OUT readings</li>
+            <li>Per-app energy tracking with Activity Monitor-style attribution</li>
             <li>Smoothing + refresh controls to tame noisy spikes</li>
             <li>Telemetry is optional and off unless you opt in</li>
           </ul>
@@ -420,8 +421,16 @@
             <p>Reads system voltage and current directly from macOS to show accurate IN vs OUT wattage.</p>
           </article>
           <article>
+            <h3>Per-app energy tracking</h3>
+            <p>See which apps consume the most power with Activity Monitor-style attribution and 24-hour history.</p>
+          </article>
+          <article>
             <h3>Two display modes</h3>
             <p>Pick a net view (IN−OUT) or separate IN and OUT labels for detailed profiling.</p>
+          </article>
+          <article>
+            <h3>Usage charts and insights</h3>
+            <p>Total power over time, stacked per-app energy charts, and ranked top consumers list.</p>
           </article>
           <article>
             <h3>Smoothing controls</h3>
@@ -437,7 +446,7 @@
           </article>
           <article>
             <h3>Privacy-first</h3>
-            <p>No telemetry is sent unless you explicitly opt in. You can flip the switch anytime.</p>
+            <p>No telemetry is sent unless you explicitly opt in. All usage data stays on your Mac.</p>
           </article>
         </div>
       </section>
@@ -500,8 +509,19 @@
               average them out.</p>
           </details>
           <details>
+            <summary>How is per-app power estimated?</summary>
+            <p>PowerWatt uses Activity Monitor-style attribution based on CPU time, disk I/O, and system wakeups. The 
+              total system power is proportionally allocated to apps based on their relative activity.</p>
+          </details>
+          <details>
             <summary>Does it work on desktops?</summary>
-            <p>PowerWatt relies on battery stats, so it’s intended for Macs with a battery.</p>
+            <p>PowerWatt relies on battery stats for total watts, so it’s intended for Macs with a battery. The per-app
+              tracking works on any Mac but shows relative scores instead of estimated watts.</p>
+          </details>
+          <details>
+            <summary>Where is usage data stored?</summary>
+            <p>All usage data is stored locally in SQLite under ~/Library/Application Support/PowerWatt. 
+              No per-app data is ever transmitted.</p>
           </details>
           <details>
             <summary>Where do I report issues?</summary>

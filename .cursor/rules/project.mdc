@@ -11,7 +11,21 @@
 
 ## Releases
 
-- If a change is mentioned in release notes or README “Features”, ensure the website’s feature list remains consistent.
-- The release workflow publishes end-user artifacts (`.dmg`, `.pkg`, `.zip`). Keep `docs/index.html` download/install instructions aligned with what’s shipped.
+- If a change is mentioned in release notes or README "Features", ensure the website's feature list remains consistent.
+- The release workflow publishes end-user artifacts (`.dmg`, `.pkg`, `.zip`). Keep `docs/index.html` download/install instructions aligned with what's shipped.
 
+## Project Structure
+
+The project follows this organization:
+
+- `PowerWatt/Models/` - Data models (TotalPowerSample, ProcessMetricsSample, EnergyImpactSample, AppPowerSample)
+- `PowerWatt/Services/` - Business logic services (TotalPowerService, ProcessMetricsService, EnergyImpactService, PowerAttributionService, UsageManager)
+- `PowerWatt/Storage/` - Data persistence (UsageStore, MinuteBucketAggregator)
+- `PowerWatt/UI/Usage/` - Usage tracking UI (UsageView, UsageViewModel, AppDetailView)
+- `PowerWatt/UI/Usage/Charts/` - Chart components (TotalPowerChart, AppStackedEnergyChart)
+
+## Usage Feature Documentation
+
+- `docs/USAGE_FEATURE.md` - Technical documentation for the Usage feature
+- `docs/VALIDATION.md` - Validation guide comparing with Activity Monitor
 
