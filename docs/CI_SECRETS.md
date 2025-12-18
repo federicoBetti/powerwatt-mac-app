@@ -19,6 +19,15 @@ Sparkle update ZIPs must be signed with the private Ed25519 key that pairs with 
 
 The workflow writes this secret into a temporary file (see the "Generate appcast" step) and removes it immediately after generating `docs/appcast.xml`.
 
+### `POSTHOG_API_KEY`
+PowerWatt's anonymous telemetry is powered by PostHog. The API key is injected at build-time so it never lives in the repo:
+
+1. In PostHog, generate a client (public) API key for the EU cloud project the app reports to.
+2. Add it as a GitHub Actions secret named `POSTHOG_API_KEY`.
+3. The release workflow exports the secret into the `xcodebuild` invocation, which in turn writes it to `Info.plist`.
+
+The app automatically disables telemetry if this build setting is missing or empty, so local developer builds will simply skip analytics unless you define `POSTHOG_API_KEY` in a personal `.xcconfig` (ignored by git) or pass it to `xcodebuild` explicitly.
+
 #### Rotation
 - Re-run `generate_keys` to create a new keypair.
 - Update `Info.plist` with the new **public** key before shipping a release.
@@ -33,3 +42,4 @@ When you're ready to notarize and staple releases, you'll need additional creden
 - `NOTARYTOOL_APPLE_ID`, `NOTARYTOOL_TEAM_ID`, `NOTARYTOOL_PASSWORD`: credentials for `xcrun notarytool` (usually an App-Specific Password).
 
 Documented here so the follow-up Gatekeeper/notarization phase can plug them into the workflow without guesswork.
+

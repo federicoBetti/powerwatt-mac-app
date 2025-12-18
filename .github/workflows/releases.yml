@@ -13,6 +13,7 @@ jobs:
     runs-on: macos-latest
     env:
       SPARKLE_VERSION: "2.8.1"
+      POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
 
     steps:
       - name: Checkout
@@ -44,6 +45,11 @@ jobs:
         run: |
           set -euo pipefail
 
+          if [[ -z "${POSTHOG_API_KEY:-}" ]]; then
+            echo "Missing secret POSTHOG_API_KEY" >&2
+            exit 1
+          fi
+
           xcodebuild \
             -project "PowerWatt.xcodeproj" \
             -scheme "PowerWatt" \
@@ -54,6 +60,7 @@ jobs:
             CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
+            POSTHOG_API_KEY="${POSTHOG_API_KEY}" \
             build
 
           APP_PATH="build/DerivedData/Build/Products/Release/PowerWatt.app"

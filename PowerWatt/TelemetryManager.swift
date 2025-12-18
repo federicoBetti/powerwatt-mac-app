@@ -5,9 +5,6 @@ import PostHog
 final class TelemetryManager: ObservableObject {
     static let shared = TelemetryManager()
 
-    private let posthogApiKey = "phc_dE1g01TbtnB5XkbDJ09K3d9x2pOK2TgAVTNoxHgY94f"
-    private let posthogHost = "https://eu.i.posthog.com"
-
     private let installIdKey = "install_id"
     private let keychainService: String
 
@@ -42,19 +39,19 @@ final class TelemetryManager: ObservableObject {
         }
 
         if AppSettings.shared.telemetryEnabled {
-            setupIfNeeded()
             capture(event: "app_launch", properties: [:])
         }
     }
 
     func setEnabled(_ enabled: Bool) {
         if enabled {
+            guard setupIfNeeded() else { return }
             AppSettings.shared.telemetryEnabled = true
-            setupIfNeeded()
             PostHogSDK.shared.optIn()
             capture(event: "app_first_launch", properties: [:])
         } else {
             AppSettings.shared.telemetryEnabled = false
+            guard didSetupSDK else { return }
             PostHogSDK.shared.optOut()
             PostHogSDK.shared.reset()
             PostHogSDK.shared.flush()
@@ -72,7 +69,7 @@ final class TelemetryManager: ObservableObject {
         }
         lastEventTimestamps[dedupeKey] = now
 
-        setupIfNeeded()
+        guard setupIfNeeded() else { return }
 
         sessionEventCount += 1
         PostHogSDK.shared.capture(event, properties: commonProperties().merging(properties) { _, new in new })
@@ -83,15 +80,18 @@ final class TelemetryManager: ObservableObject {
         NSWorkspace.shared.open(url)
     }
 
-    private func setupIfNeeded() {
-        guard !didSetupSDK else { return }
+    @discardableResult
+    private func setupIfNeeded() -> Bool {
+        guard !didSetupSDK else { return true }
+        guard let apiKey = posthogApiKey else { return false }
         didSetupSDK = true
 
-        let config = PostHogConfig(apiKey: posthogApiKey, host: posthogHost)
+        let config = PostHogConfig(apiKey: apiKey, host: posthogHost)
         config.captureApplicationLifecycleEvents = false
         config.captureScreenViews = false
 
         PostHogSDK.shared.setup(config)
+        return true
     }
 
     private func presentConsentPrompt() {
@@ -134,3 +134,22 @@ final class TelemetryManager: ObservableObject {
         return "\(event)|\(sorted)"
     }
 }
+
+private extension TelemetryManager {
+    var posthogApiKey: String? {
+        guard let rawValue = Bundle.main.object(forInfoDictionaryKey: "POSTHOG_API_KEY") as? String,
+              !rawValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return nil
+        }
+        return rawValue
+    }
+
+    var posthogHost: String {
+        guard let rawValue = Bundle.main.object(forInfoDictionaryKey: "POSTHOG_HOST") as? String,
+              !rawValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return "https://eu.i.posthog.com"
+        }
+        return rawValue
+    }
+}
+

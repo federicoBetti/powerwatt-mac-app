@@ -30,5 +30,12 @@
 	<string>https://federicoBetti.github.io/powerwatt-mac-app/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>lUjRzIMljlPbLtt+hQ0bbS6A1Dke1b0PY0mVhvYAGnM=</string>
+
+	<!-- Telemetry -->
+	<key>POSTHOG_API_KEY</key>
+	<string>$(POSTHOG_API_KEY)</string>
+	<key>POSTHOG_HOST</key>
+	<string>$(POSTHOG_HOST)</string>
 </dict>
 </plist>
+
