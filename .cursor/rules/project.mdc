@@ -13,3 +13,5 @@
 
 - If a change is mentioned in release notes or README “Features”, ensure the website’s feature list remains consistent.
 - The release workflow publishes end-user artifacts (`.dmg`, `.pkg`, `.zip`). Keep `docs/index.html` download/install instructions aligned with what’s shipped.
+
+

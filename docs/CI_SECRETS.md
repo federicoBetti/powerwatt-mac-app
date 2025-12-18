@@ -43,3 +43,4 @@ When you're ready to notarize and staple releases, you'll need additional creden
 
 Documented here so the follow-up Gatekeeper/notarization phase can plug them into the workflow without guesswork.
 
+

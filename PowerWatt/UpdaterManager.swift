@@ -29,3 +29,5 @@ final class UpdaterManager: NSObject, ObservableObject, SPUUpdaterDelegate {
     }
     #endif
 }
+
+
