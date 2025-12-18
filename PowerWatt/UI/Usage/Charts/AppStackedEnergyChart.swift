@@ -45,7 +45,7 @@ struct AppStackedEnergyChart: View {
                     
                     AreaMark(
                         x: .value("Time", point.timestamp),
-                        y: .value("Energy", value)
+                        y: .value(showWatts ? "Energy" : "Relative", value)
                     )
                     .foregroundStyle(by: .value("App", displayName(for: category)))
                     .interpolationMethod(.catmullRom)
@@ -68,8 +68,8 @@ struct AppStackedEnergyChart: View {
             AxisMarks(position: .leading) { value in
                 AxisGridLine()
                 AxisValueLabel {
-                    if let mWh = value.as(Double.self) {
-                        Text(formatEnergy(mWh))
+                    if let v = value.as(Double.self) {
+                        Text(showWatts ? formatEnergy(v) : formatRelative(v))
                             .font(.caption2)
                     }
                 }
@@ -103,14 +103,19 @@ struct AppStackedEnergyChart: View {
     
     private var emptyView: some View {
         VStack(spacing: 8) {
-            Image(systemName: "chart.bar.fill")
+            Image(systemName: "lock.shield")
                 .font(.largeTitle)
-                .foregroundStyle(.secondary)
-            Text("No app energy data")
+                .foregroundStyle(.orange)
+            Text("Per-app data unavailable")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            Text("App Sandbox prevents reading other processes.\nDisable sandbox in Xcode to enable this feature.")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding()
     }
     
     // MARK: - Helpers
@@ -145,6 +150,14 @@ struct AppStackedEnergyChart: View {
         } else {
             return String(format: "%.2f mWh", mWh)
         }
+    }
+    
+    private func formatRelative(_ share: Double) -> String {
+        let pct = max(0, min(1, share)) * 100
+        if pct >= 10 {
+            return String(format: "%.0f%%", pct)
+        }
+        return String(format: "%.1f%%", pct)
     }
 }
 

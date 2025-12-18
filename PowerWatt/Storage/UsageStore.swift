@@ -197,16 +197,14 @@ final class UsageStore {
             VALUES (?, ?, ?, ?, ?)
             ON CONFLICT(ts_minute) DO UPDATE SET
                 total_mWh = total_mWh + excluded.total_mWh,
-                total_watts_avg = COALESCE(
-                    (total_watts_avg * samples_count + excluded.total_watts_avg) / (samples_count + 1),
-                    excluded.total_watts_avg
-                ),
+                total_watts_avg = CASE
+                    WHEN total_watts_avg IS NULL THEN excluded.total_watts_avg
+                    WHEN excluded.total_watts_avg IS NULL THEN total_watts_avg
+                    ELSE excluded.total_watts_avg
+                END,
                 is_on_ac = excluded.is_on_ac,
                 battery_pct = excluded.battery_pct
         """
-        
-        // Note: This simplified upsert adds mWh and updates latest values
-        // A proper implementation would track sample counts for averaging
         
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return }

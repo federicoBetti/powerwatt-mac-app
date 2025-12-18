@@ -63,3 +63,4 @@ Gatekeeper hardening is explicitly deferred for now, but plan on a follow-up ite
 Track this list when you're ready to tackle Gatekeeper; nothing in the current workflow depends on these steps yet.
 
 
+

@@ -32,6 +32,7 @@ struct PowerWattApp: App {
                 .environmentObject(powerService)
                 .environmentObject(settings)
                 .environmentObject(telemetryManager)
+                .environmentObject(usageManager)
         }
         .menuBarExtraStyle(.window)
 
@@ -75,6 +76,7 @@ private struct MenuBarLabelView: View {
     @EnvironmentObject var powerService: BatteryPowerService
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var telemetryManager: TelemetryManager
+    @EnvironmentObject var usageManager: UsageManager
 
     var body: some View {
         HStack(spacing: 4) {
@@ -86,6 +88,10 @@ private struct MenuBarLabelView: View {
         .onAppear {
             telemetryManager.handleAppLaunch()
             powerService.startPolling(intervalSeconds: settings.refreshIntervalSeconds)
+            // Start usage tracking in the background (not only when opening the menu/preferences)
+            if settings.usageTrackingEnabled && !usageManager.isRunning {
+                usageManager.start()
+            }
         }
         .onChange(of: settings.refreshIntervalSeconds) { _, newValue in
             powerService.startPolling(intervalSeconds: newValue)
@@ -298,6 +304,18 @@ private struct MenuContentView: View {
             Button {
                 telemetryManager.capture(event: "feature_used", properties: ["feature_name": "usage_view", "context": "menu"])
                 openWindow(id: "usage")
+                // Stage Manager / menu-bar contexts sometimes open behind; use aggressive activation.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    NSApp.activate(ignoringOtherApps: true)
+                    if let usageWindow = NSApp.windows.first(where: { $0.title == "Power Usage" }) {
+                        usageWindow.orderFrontRegardless()
+                        usageWindow.makeKeyAndOrderFront(nil)
+                    }
+                }
+                // Double-tap for Stage Manager which can be stubborn
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    NSApp.activate(ignoringOtherApps: true)
+                }
             } label: {
                 HStack {
                     Image(systemName: "chart.bar.fill")

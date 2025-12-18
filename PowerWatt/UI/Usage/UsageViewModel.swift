@@ -55,6 +55,14 @@ final class UsageViewModel: ObservableObject {
                 Task { await self?.refreshData() }
             }
             .store(in: &cancellables)
+        
+        // Recompute charts when switching between Watts/Relative
+        $showEstimatedWatts
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                self?.updateAppStackedChartData()
+            }
+            .store(in: &cancellables)
     }
     
     // MARK: - Data Loading
@@ -71,7 +79,7 @@ final class UsageViewModel: ObservableObject {
                 Task { @MainActor in
                     self?.minuteBuckets = buckets
                     self?.hasWattsData = buckets.contains { $0.totalWattsAvg != nil }
-                    self?.updateTotalPowerChartData()
+                    self?.updateTotalPowerChartData(range: range)
                     continuation.resume()
                 }
             }
@@ -118,22 +126,56 @@ final class UsageViewModel: ObservableObject {
     // MARK: - Chart Data Preparation
     
     private func updateTotalPowerChartData() {
-        totalPowerChartData = minuteBuckets.map { bucket in
-            ChartDataPoint(
+        let range = selectedTimeRange.getRange()
+        updateTotalPowerChartData(range: range)
+    }
+    
+    private func updateTotalPowerChartData(range: (start: Int64, end: Int64)) {
+        // Keep the "No data yet" state until we have at least one stored bucket.
+        guard !minuteBuckets.isEmpty else {
+            totalPowerChartData = []
+            return
+        }
+        
+        let bucketsByMinute = Dictionary(uniqueKeysWithValues: minuteBuckets.map { ($0.tsMinute, $0) })
+        let start = range.start - (range.start % 60)
+        // `range.end` is "end of current minute", i.e. start-of-next-minute. Exclude the future minute.
+        let end = max(start, (range.end - (range.end % 60)) - 60)
+        
+        var points: [ChartDataPoint] = []
+        points.reserveCapacity(Int((end - start) / 60) + 1)
+        
+        var ts = start
+        while ts <= end {
+            if let bucket = bucketsByMinute[ts] {
+                points.append(ChartDataPoint(
                 timestamp: Date(timeIntervalSince1970: TimeInterval(bucket.tsMinute)),
                 value: bucket.totalWattsAvg ?? 0,
                 hasData: bucket.totalWattsAvg != nil
-            )
+                ))
+            } else {
+                points.append(ChartDataPoint(
+                    timestamp: Date(timeIntervalSince1970: TimeInterval(ts)),
+                    value: 0,
+                    hasData: false
+                ))
         }
+            
+            ts += 60
+        }
+        
+        totalPowerChartData = points
     }
     
     private func updateAppStackedChartData() {
+        let usingWatts = showEstimatedWatts && hasWattsData
         // Get top apps by total mWh
         var appTotals: [String: (name: String?, mWh: Double)] = [:]
         
         for bucket in appBuckets {
             var entry = appTotals[bucket.bundleId] ?? (name: bucket.appName, mWh: 0)
-            entry.mWh += bucket.mWh
+            // Rank by energy when watts are available, otherwise rank by relative impact.
+            entry.mWh += usingWatts ? bucket.mWh : bucket.relativeImpactSum
             if entry.name == nil { entry.name = bucket.appName }
             appTotals[bucket.bundleId] = entry
         }
@@ -148,9 +190,20 @@ final class UsageViewModel: ObservableObject {
             var minuteData = bucketsByMinute[bucket.tsMinute] ?? [:]
             
             if topAppsForChart.contains(bucket.bundleId) {
+                if usingWatts {
                 minuteData[bucket.bundleId] = bucket.mWh
+                } else {
+                    // Average normalized share for this minute (0..1-ish)
+                    let avgShare = bucket.samplesCount > 0 ? (bucket.relativeImpactSum / Double(bucket.samplesCount)) : 0
+                    minuteData[bucket.bundleId] = avgShare
+                }
             } else {
+                if usingWatts {
                 minuteData["Others", default: 0] += bucket.mWh
+                } else {
+                    let avgShare = bucket.samplesCount > 0 ? (bucket.relativeImpactSum / Double(bucket.samplesCount)) : 0
+                    minuteData["Others", default: 0] += avgShare
+                }
             }
             
             bucketsByMinute[bucket.tsMinute] = minuteData

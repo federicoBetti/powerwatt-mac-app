@@ -23,6 +23,7 @@ The project follows this organization:
 - `PowerWatt/Storage/` - Data persistence (UsageStore, MinuteBucketAggregator)
 - `PowerWatt/UI/Usage/` - Usage tracking UI (UsageView, UsageViewModel, AppDetailView)
 - `PowerWatt/UI/Usage/Charts/` - Chart components (TotalPowerChart, AppStackedEnergyChart)
+- `Info.plist` - App Info.plist (kept at repo root to avoid being copied as a resource)
 
 ## Usage Feature Documentation
 

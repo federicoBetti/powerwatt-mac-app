@@ -8,6 +8,7 @@
 import Foundation
 import AppKit
 import Combine
+import Darwin
 
 /// Service that collects per-process metrics (CPU, memory, disk I/O, etc.)
 final class ProcessMetricsService: ObservableObject {
@@ -205,7 +206,7 @@ final class ProcessMetricsService: ObservableObject {
         
         // Get all PIDs using proc_listallpids
         var pids = [pid_t](repeating: 0, count: 2048)
-        let byteCount = proc_listallpids(&pids, Int32(MemoryLayout<pid_t>.size * pids.count))
+        let byteCount = pw_proc_listallpids(&pids, Int32(MemoryLayout<pid_t>.size * pids.count))
         let pidCount = Int(byteCount) / MemoryLayout<pid_t>.size
         
         for i in 0..<pidCount {
@@ -218,7 +219,7 @@ final class ProcessMetricsService: ObservableObject {
             
             // Get process name
             var nameBuffer = [CChar](repeating: 0, count: 1024)
-            let nameLen = proc_name(pid, &nameBuffer, UInt32(nameBuffer.count))
+            let nameLen = pw_proc_name(pid, &nameBuffer, UInt32(nameBuffer.count))
             
             guard nameLen > 0 else { continue }
             
@@ -247,10 +248,8 @@ final class ProcessMetricsService: ObservableObject {
     /// Get resource usage for a process using proc_pid_rusage
     private func getProcessResourceUsage(pid: pid_t) -> ProcessResourceUsage? {
         var rusage = rusage_info_v4()
-        let result = withUnsafeMutablePointer(to: &rusage) { ptr in
-            ptr.withMemoryRebound(to: rusage_info_t?.self, capacity: 1) { rusagePtr in
-                proc_pid_rusage(pid, RUSAGE_INFO_V4, rusagePtr)
-            }
+        let result = withUnsafeMutableBytes(of: &rusage) { buffer in
+            pw_proc_pid_rusage(pid, RUSAGE_INFO_V4, buffer.baseAddress)
         }
         
         guard result == 0 else { return nil }
@@ -259,7 +258,7 @@ final class ProcessMetricsService: ObservableObject {
             pid: pid,
             userTime: rusage.ri_user_time,
             systemTime: rusage.ri_system_time,
-            wakeups: rusage.ri_interrupt_wakeups + rusage.ri_pkg_idle_wkups,
+            wakeups: rusage.ri_interrupt_wkups + rusage.ri_pkg_idle_wkups,
             diskBytesRead: rusage.ri_diskio_bytesread,
             diskBytesWritten: rusage.ri_diskio_byteswritten,
             networkBytesIn: nil,  // Not available in rusage_info
@@ -272,13 +271,13 @@ final class ProcessMetricsService: ObservableObject {
 
 // These are bridged from sys/resource.h and libproc.h
 @_silgen_name("proc_listallpids")
-private func proc_listallpids(_ buffer: UnsafeMutablePointer<pid_t>?, _ buffersize: Int32) -> Int32
+private func pw_proc_listallpids(_ buffer: UnsafeMutablePointer<pid_t>?, _ buffersize: Int32) -> Int32
 
 @_silgen_name("proc_name")
-private func proc_name(_ pid: pid_t, _ buffer: UnsafeMutablePointer<CChar>?, _ buffersize: UInt32) -> Int32
+private func pw_proc_name(_ pid: pid_t, _ buffer: UnsafeMutablePointer<CChar>?, _ buffersize: UInt32) -> Int32
 
 @_silgen_name("proc_pid_rusage")
-private func proc_pid_rusage(_ pid: pid_t, _ flavor: Int32, _ buffer: UnsafeMutablePointer<rusage_info_t?>?) -> Int32
+private func pw_proc_pid_rusage(_ pid: pid_t, _ flavor: Int32, _ buffer: UnsafeMutableRawPointer?) -> Int32
 
 private let RUSAGE_INFO_V4: Int32 = 4
 

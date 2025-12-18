@@ -93,14 +93,17 @@ final class UsageManager: ObservableObject {
             .store(in: &cancellables)
         
         // Apply custom coefficients if enabled
+        let weightsPublisher = Publishers.CombineLatest4(
+            AppSettings.shared.$cpuWeight,
+            AppSettings.shared.$wakeupsWeight,
+            AppSettings.shared.$diskWeight,
+            AppSettings.shared.$networkWeight
+        )
+
         AppSettings.shared.$useCustomCoefficients
-            .combineLatest(
-                AppSettings.shared.$cpuWeight,
-                AppSettings.shared.$wakeupsWeight,
-                AppSettings.shared.$diskWeight,
-                AppSettings.shared.$networkWeight
-            )
-            .sink { [weak self] useCustom, cpu, wakeups, disk, network in
+            .combineLatest(weightsPublisher)
+            .sink { [weak self] useCustom, weights in
+                let (cpu, wakeups, disk, network) = weights
                 if useCustom {
                     let coeffs = EnergyCoefficients(
                         cpuWeight: cpu,

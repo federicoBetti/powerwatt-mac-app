@@ -51,7 +51,7 @@ struct TopConsumersListView: View {
             
             Spacer()
             
-            Text("Energy")
+            Text(showWatts ? "Energy" : "Relative")
                 .frame(width: 80, alignment: .trailing)
             
             if showWatts {
@@ -79,7 +79,10 @@ struct TopConsumersListView: View {
     // MARK: - App Row
     
     private func appRow(for summary: AppPowerSummary) -> some View {
-        HStack(spacing: 8) {
+        let totalRelative = summaries.map(\.totalRelativeScore).reduce(0, +)
+        let relativePct = totalRelative > 0 ? (summary.totalRelativeScore / totalRelative) * 100 : 0
+        
+        return HStack(spacing: 8) {
             // App icon and name
             HStack(spacing: 8) {
                 if let icon = viewModel.getAppIcon(bundleId: summary.bundleId) {
@@ -104,8 +107,8 @@ struct TopConsumersListView: View {
             
             Spacer()
             
-            // Energy
-            Text(formatEnergy(summary.energyWh))
+            // Energy or Relative
+            Text(showWatts ? formatEnergy(summary.energyWh) : formatRelative(relativePct))
                 .monospacedDigit()
                 .frame(width: 80, alignment: .trailing)
             
@@ -173,6 +176,13 @@ struct TopConsumersListView: View {
         } else {
             return String(format: "%.1f mWh", wh * 1000)
         }
+    }
+    
+    private func formatRelative(_ pct: Double) -> String {
+        if pct >= 10 {
+            return String(format: "%.0f%%", pct)
+        }
+        return String(format: "%.1f%%", pct)
     }
 }
 

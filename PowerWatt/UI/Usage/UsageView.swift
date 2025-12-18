@@ -61,13 +61,21 @@ struct UsageView: View {
     private var topBar: some View {
         HStack {
             // Time range selector
-            Picker("Range", selection: $viewModel.selectedTimeRange) {
-                ForEach(MinuteBucketAggregator.TimeRange.allCases, id: \.self) { range in
-                    Text(range.title).tag(range)
+            HStack(spacing: 8) {
+                Text("Range")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 48, alignment: .leading)
+                
+                Picker("", selection: $viewModel.selectedTimeRange) {
+                    ForEach(MinuteBucketAggregator.TimeRange.allCases, id: \.self) { range in
+                        Text(range.title).tag(range)
+                    }
                 }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .frame(width: 240)
             }
-            .pickerStyle(.segmented)
-            .frame(maxWidth: 200)
             
             Spacer()
             
@@ -157,7 +165,7 @@ struct UsageView: View {
                 
                 Spacer()
                 
-                if !viewModel.hasWattsData {
+                if !viewModel.totalPowerChartData.isEmpty && !viewModel.hasWattsData {
                     Label("Unavailable", systemImage: "exclamationmark.triangle")
                         .font(.caption)
                         .foregroundStyle(.orange)
@@ -178,7 +186,7 @@ struct UsageView: View {
     
     private var perAppEnergySection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Energy by App")
+            Text((viewModel.showEstimatedWatts && viewModel.hasWattsData) ? "Energy by App" : "Relative Impact by App")
                 .font(.headline)
             
             AppStackedEnergyChart(
@@ -201,9 +209,15 @@ struct UsageView: View {
                 .font(.headline)
             
             if viewModel.appSummaries.isEmpty {
-                Text("No data available for this time range")
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, minHeight: 100)
+                VStack(spacing: 6) {
+                    Image(systemName: "lock.shield")
+                        .font(.title2)
+                        .foregroundStyle(.orange)
+                    Text("Per-app tracking requires disabling App Sandbox")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, minHeight: 100)
             } else {
                 TopConsumersListView(
                     summaries: viewModel.appSummaries,

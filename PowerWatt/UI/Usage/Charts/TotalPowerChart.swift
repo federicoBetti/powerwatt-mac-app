@@ -38,7 +38,8 @@ struct TotalPowerChart: View {
                     
                     AreaMark(
                         x: .value("Time", point.timestamp),
-                        y: .value("Watts", point.value)
+                        yStart: .value("Baseline", yAxisDomain.lowerBound),
+                        yEnd: .value("Watts", point.value)
                     )
                     .foregroundStyle(
                         LinearGradient(

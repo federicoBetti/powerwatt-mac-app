@@ -8,15 +8,24 @@ struct PreferencesView: View {
     @EnvironmentObject var telemetryManager: TelemetryManager
     
     @State private var showCoefficientsSheet = false
+    
+    private enum Layout {
+        static let sliderWidth: CGFloat = 240
+        static let valueWidth: CGFloat = 56
+    }
 
     var body: some View {
         Form {
-            Section("General") {
-                HStack {
-                    Text("Refresh every")
-                    Slider(value: $settings.refreshIntervalSeconds, in: 1...60, step: 1)
-                        .frame(maxWidth: 240)
-                    Text("\(Int(settings.refreshIntervalSeconds)) s").monospacedDigit()
+            Section {
+                LabeledContent("Refresh every") {
+                    HStack(spacing: 10) {
+                        Slider(value: $settings.refreshIntervalSeconds, in: 1...60, step: 1)
+                            .frame(width: Layout.sliderWidth)
+                        Text("\(Int(settings.refreshIntervalSeconds)) s")
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                            .frame(width: Layout.valueWidth, alignment: .trailing)
+                    }
                 }
                 .onChange(of: settings.refreshIntervalSeconds) { _, newValue in
                     powerService.startPolling(intervalSeconds: newValue)
@@ -41,9 +50,11 @@ struct PreferencesView: View {
                 )) {
                     Text("Open at Login")
                 }
+            } header: {
+                Text("General")
             }
 
-            Section("Menu Bar") {
+            Section {
                 Picker("Display mode", selection: $settings.displayMode) {
                     ForEach(AppSettings.DisplayMode.allCases) { mode in
                         Text(mode.title).tag(mode)
@@ -61,8 +72,12 @@ struct PreferencesView: View {
                     telemetryManager.capture(event: "setting_changed", properties: ["setting_name": "label_style", "new_value_bucketed": newValue.title])
                 }
 
-                Stepper(value: $settings.decimalPlaces, in: 0...2) {
-                    Text("Decimal places: \(settings.decimalPlaces)")
+                LabeledContent("Decimal places") {
+                    Stepper(value: $settings.decimalPlaces, in: 0...2) {
+                        Text("\(settings.decimalPlaces)")
+                            .monospacedDigit()
+                            .frame(width: 20, alignment: .trailing)
+                    }
                 }
                 .onChange(of: settings.decimalPlaces) { _, newValue in
                     telemetryManager.capture(event: "setting_changed", properties: ["setting_name": "decimal_places", "new_value_bucketed": "\(newValue)"])
@@ -77,9 +92,11 @@ struct PreferencesView: View {
                         telemetryManager.capture(event: "setting_changed", properties: ["setting_name": "show_battery_percent", "new_value_bucketed": newValue ? "on" : "off"])
                     }
 
+            } header: {
+                Text("Menu Bar")
             }
             
-            Section("Usage Tracking") {
+            Section {
                 Toggle("Enable usage tracking", isOn: $settings.usageTrackingEnabled)
                     .onChange(of: settings.usageTrackingEnabled) { _, newValue in
                         telemetryManager.capture(event: "setting_changed", properties: ["setting_name": "usage_tracking_enabled", "new_value_bucketed": newValue ? "on" : "off"])
@@ -91,11 +108,15 @@ struct PreferencesView: View {
                     }
                 
                 if settings.usageTrackingEnabled {
-                    HStack {
-                        Text("Sampling interval")
-                        Slider(value: $settings.usageSamplingIntervalSeconds, in: 2...10, step: 1)
-                            .frame(maxWidth: 200)
-                        Text("\(Int(settings.usageSamplingIntervalSeconds)) s").monospacedDigit()
+                    LabeledContent("Sampling interval") {
+                        HStack(spacing: 10) {
+                            Slider(value: $settings.usageSamplingIntervalSeconds, in: 2...10, step: 1)
+                                .frame(width: Layout.sliderWidth)
+                            Text("\(Int(settings.usageSamplingIntervalSeconds)) s")
+                                .monospacedDigit()
+                                .foregroundStyle(.secondary)
+                                .frame(width: Layout.valueWidth, alignment: .trailing)
+                        }
                     }
                     .onChange(of: settings.usageSamplingIntervalSeconds) { _, newValue in
                         telemetryManager.capture(event: "setting_changed", properties: ["setting_name": "usage_sampling_interval", "new_value_bucketed": "\(Int(newValue))"])
@@ -115,44 +136,38 @@ struct PreferencesView: View {
                             telemetryManager.capture(event: "setting_changed", properties: ["setting_name": "usage_include_background", "new_value_bucketed": newValue ? "on" : "off"])
                         }
                     
-                    HStack {
-                        Text("Status:")
-                            .foregroundStyle(.secondary)
-                        if usageManager.isRunning {
+                    LabeledContent("Status") {
+                        HStack(spacing: 6) {
                             Image(systemName: "circle.fill")
-                                .foregroundStyle(.green)
+                                .foregroundStyle(usageManager.isRunning ? .green : .red)
                                 .font(.caption2)
-                            Text("Running")
-                        } else {
-                            Image(systemName: "circle.fill")
-                                .foregroundStyle(.red)
-                                .font(.caption2)
-                            Text("Stopped")
+                            Text(usageManager.isRunning ? "Running" : "Stopped")
                         }
                     }
                 }
-                
+            } header: {
+                Text("Usage Tracking")
+            } footer: {
                 Text("Tracks per-app energy usage over time. All data is stored locally.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
-            Section("Updates") {
+            Section {
                 Toggle("Automatically check for updates", isOn: Binding(get: {
                     updaterManager.automaticallyChecksForUpdates
                 }, set: { newValue in
                     updaterManager.automaticallyChecksForUpdates = newValue
                     telemetryManager.capture(event: "setting_changed", properties: ["setting_name": "auto_check_updates", "new_value_bucketed": newValue ? "on" : "off"])
                 }))
-                Text("Updates are installed via Sparkle from the official appcast.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text("For updates to work, PowerWatt must be installed in /Applications (not run from the DMG).")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            } header: {
+                Text("Updates")
+            } footer: {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Updates are installed via Sparkle from the official appcast.")
+                    Text("For updates to work, PowerWatt must be installed in /Applications (not run from the DMG).")
+                }
             }
 
-            Section("Privacy") {
+            Section {
                 Toggle("Share anonymous usage stats", isOn: Binding(get: {
                     settings.telemetryEnabled
                 }, set: { newValue in
@@ -162,48 +177,48 @@ struct PreferencesView: View {
                     telemetryManager.openPrivacyPage()
                 }
                 .buttonStyle(.link)
+            } header: {
+                Text("Privacy")
+            } footer: {
                 Text("Anonymous usage stats are optional and help prioritize improvements. Off by default.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
-            Section("Advanced") {
-                HStack {
-                    Text("Smoothing window")
-                    Slider(value: $settings.smoothingWindowSeconds, in: 0...30, step: 1)
-                        .frame(maxWidth: 240)
-                    Text(settings.smoothingWindowSeconds == 0 ? "Off" : "\(Int(settings.smoothingWindowSeconds)) s")
-                        .monospacedDigit()
+            Section {
+                LabeledContent("Smoothing window") {
+                    HStack(spacing: 10) {
+                        Slider(value: $settings.smoothingWindowSeconds, in: 0...30, step: 1)
+                            .frame(width: Layout.sliderWidth)
+                        Text(settings.smoothingWindowSeconds == 0 ? "Off" : "\(Int(settings.smoothingWindowSeconds)) s")
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                            .frame(width: Layout.valueWidth, alignment: .trailing)
+                    }
                 }
                 .onChange(of: settings.smoothingWindowSeconds) { _, newValue in
                     let bucket = newValue == 0 ? "off" : "\(Int(newValue))"
                     telemetryManager.capture(event: "setting_changed", properties: ["setting_name": "smoothing_window_seconds", "new_value_bucketed": bucket])
                 }
-                Text("Averages power readings over a short window to reduce flicker.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
                 
                 if let capacity = powerService.batteryCapacityWh {
-                    HStack {
-                        Text("Battery capacity")
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text(String(format: "%.1f Wh", capacity))
-                            .monospacedDigit()
-                        Button(action: {
-                            // Show info about battery capacity
-                            let alert = NSAlert()
-                            alert.messageText = "Battery Capacity"
-                            alert.informativeText = "This shows your Mac's total battery capacity in Watt-hours (Wh). This is the maximum energy your battery can store when fully charged. A typical MacBook Pro has between 58-100 Wh depending on the model."
-                            alert.alertStyle = .informational
-                            alert.addButton(withTitle: "OK")
-                            alert.runModal()
-                        }) {
-                            Image(systemName: "info.circle")
-                                .foregroundStyle(.secondary)
+                    LabeledContent("Battery capacity") {
+                        HStack(spacing: 8) {
+                            Text(String(format: "%.1f Wh", capacity))
+                                .monospacedDigit()
+                            Button(action: {
+                                // Show info about battery capacity
+                                let alert = NSAlert()
+                                alert.messageText = "Battery Capacity"
+                                alert.informativeText = "This shows your Mac's total battery capacity in Watt-hours (Wh). This is the maximum energy your battery can store when fully charged. A typical MacBook Pro has between 58-100 Wh depending on the model."
+                                alert.alertStyle = .informational
+                                alert.addButton(withTitle: "OK")
+                                alert.runModal()
+                            }) {
+                                Image(systemName: "info.circle")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                            .help("More information about battery capacity")
                         }
-                        .buttonStyle(.plain)
-                        .help("More information about battery capacity")
                     }
                 }
                 
@@ -211,11 +226,15 @@ struct PreferencesView: View {
                 Button("Configure Energy Weights…") {
                     showCoefficientsSheet = true
                 }
-                .font(.caption)
+                .buttonStyle(.link)
+            } header: {
+                Text("Advanced")
+            } footer: {
+                Text("Averages power readings over a short window to reduce flicker.")
             }
         }
-        .padding(16)
-        .frame(minHeight: 400)
+        .formStyle(.grouped)
+        .frame(minWidth: 520, idealWidth: 560, minHeight: 440)
         .onAppear {
             telemetryManager.capture(event: "view_opened", properties: ["view_name": "preferences"])
         }
@@ -301,6 +320,8 @@ private struct EnergyCoefficientsSheet: View {
         .environmentObject(AppSettings.shared)
         .environmentObject(BatteryPowerService())
         .environmentObject(UpdaterManager())
+        .environmentObject(UsageManager.shared)
+        .environmentObject(TelemetryManager.shared)
 }
 
 

@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.1.0)'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -21,6 +27,29 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Create tag (if workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        id: create_tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ github.event.inputs.version }}"
+          # Ensure version starts with 'v'
+          if [[ ! "$VERSION" =~ ^v ]]; then
+            VERSION="v${VERSION}"
+          fi
+          # Check if tag already exists
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "Tag $VERSION already exists" >&2
+            exit 1
+          fi
+          # Create annotated tag
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$VERSION" -m "PowerWatt $VERSION"
+          git push origin "$VERSION"
+          echo "tag=${VERSION}" >> "$GITHUB_OUTPUT"
+
       - name: Resolve Swift packages
         shell: bash
         run: |
@@ -35,7 +64,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          TAG_NAME="${GITHUB_REF_NAME}"
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            # Use the tag we just created
+            TAG_NAME="${{ steps.create_tag.outputs.tag }}"
+          else
+            # Use the tag from the push event
+            TAG_NAME="${GITHUB_REF_NAME}"
+          fi
           VERSION="${TAG_NAME#v}"
           echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"

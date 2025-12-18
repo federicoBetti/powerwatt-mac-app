@@ -119,8 +119,9 @@ final class TotalPowerService: ObservableObject {
         }
         
         // Fallback to battery-derived watts (FR1 priority 2)
-        // Only reliable when discharging on battery
-        if !isOnAC && amperageMilli < 0 {
+        // Reliable when discharging (amperage is negative). We don't strictly require isOnAC == false
+        // because some systems may report ExternalConnected inconsistently.
+        if amperageMilli < 0 {
             let batteryWatts = batteryVoltage * batteryCurrent
             
             // Sanity check

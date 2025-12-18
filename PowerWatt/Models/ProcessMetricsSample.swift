@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AppKit
 
 /// Represents metrics collected for a single process at a point in time
 struct ProcessMetricsSample: Identifiable {

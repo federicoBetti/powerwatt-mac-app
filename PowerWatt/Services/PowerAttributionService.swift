@@ -107,11 +107,13 @@ final class PowerAttributionService: ObservableObject {
         guard let totalPower = totalPowerService.latestSample else { return }
         let processSamples = processMetricsService.latestSamples
         
-        // Skip if no process data
-        guard !processSamples.isEmpty else { return }
-        
-        // Compute energy impact scores
-        let energyImpact = energyImpactService.computeScores(from: processSamples)
+        // Compute energy impact scores (if we have process data); otherwise emit total-only samples
+        let energyImpact: EnergyImpactSample
+        if processSamples.isEmpty {
+            energyImpact = EnergyImpactSample(timestamp: totalPower.timestamp, perAppScores: [:], perAppMeta: [:])
+        } else {
+            energyImpact = energyImpactService.computeScores(from: processSamples)
+        }
         
         // Attribute power to apps
         let appPower = attributePower(
