@@ -24,6 +24,7 @@ final class UsageViewModel: ObservableObject {
     @Published private(set) var appSummaries: [AppPowerSummary] = []
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var hasWattsData: Bool = false
+    @Published private(set) var isOnAC: Bool = false
     
     @Published var selectedApp: AppPowerSummary?
     @Published var selectedAppBuckets: [UsageStore.AppMinuteBucket] = []
@@ -78,7 +79,17 @@ final class UsageViewModel: ObservableObject {
             store.getMinuteBuckets(from: range.start, to: range.end) { [weak self] buckets in
                 Task { @MainActor in
                     self?.minuteBuckets = buckets
-                    self?.hasWattsData = buckets.contains { $0.totalWattsAvg != nil }
+                    self?.isOnAC = buckets.last?.isOnAC ?? false
+                    // "Watts mode" is only useful if we have enough valid total-watts minutes in the range.
+                    // When the Mac is plugged in & charging, total watts can often be unavailable for long stretches.
+                    let validCount = buckets.reduce(0) { $0 + (($1.totalWattsAvg != nil) ? 1 : 0) }
+                    let coverage = buckets.isEmpty ? 0 : Double(validCount) / Double(buckets.count)
+                    let hasMeaningfulWatts = coverage >= 0.2
+                    self?.hasWattsData = hasMeaningfulWatts
+                    if !hasMeaningfulWatts {
+                        // Avoid showing an almost-empty watts chart; fall back to relative automatically.
+                        self?.showEstimatedWatts = false
+                    }
                     self?.updateTotalPowerChartData(range: range)
                     continuation.resume()
                 }
@@ -191,22 +202,29 @@ final class UsageViewModel: ObservableObject {
             
             if topAppsForChart.contains(bucket.bundleId) {
                 if usingWatts {
-                minuteData[bucket.bundleId] = bucket.mWh
+                    minuteData[bucket.bundleId] = bucket.mWh
                 } else {
-                    // Average normalized share for this minute (0..1-ish)
-                    let avgShare = bucket.samplesCount > 0 ? (bucket.relativeImpactSum / Double(bucket.samplesCount)) : 0
-                    minuteData[bucket.bundleId] = avgShare
+                    // Use the raw sum for this minute; we'll normalize across apps below to get 0..1 shares.
+                    minuteData[bucket.bundleId] = bucket.relativeImpactSum
                 }
             } else {
                 if usingWatts {
-                minuteData["Others", default: 0] += bucket.mWh
+                    minuteData["Others", default: 0] += bucket.mWh
                 } else {
-                    let avgShare = bucket.samplesCount > 0 ? (bucket.relativeImpactSum / Double(bucket.samplesCount)) : 0
-                    minuteData["Others", default: 0] += avgShare
+                    minuteData["Others", default: 0] += bucket.relativeImpactSum
                 }
             }
             
             bucketsByMinute[bucket.tsMinute] = minuteData
+        }
+        
+        // In Relative mode, convert per-minute totals into normalized shares (so the stack sums to ~1.0).
+        if !usingWatts {
+            for (minute, minuteData) in bucketsByMinute {
+                let total = minuteData.values.reduce(0, +)
+                guard total > 0 else { continue }
+                bucketsByMinute[minute] = minuteData.mapValues { $0 / total }
+            }
         }
         
         // Convert to chart data

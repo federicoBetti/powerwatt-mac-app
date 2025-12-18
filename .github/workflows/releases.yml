@@ -207,8 +207,34 @@ jobs:
             dist/PowerWatt.zip
 
       - name: Commit updated docs/appcast.xml
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Update Sparkle appcast for ${{ steps.version.outputs.tag }}"
-          file_pattern: "docs/appcast.xml"
-          branch: main
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Commit only if the file actually changed
+          if git diff --quiet -- "docs/appcast.xml"; then
+            echo "No changes in docs/appcast.xml; skipping commit."
+            exit 0
+          fi
+
+          git add "docs/appcast.xml"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update Sparkle appcast for ${{ steps.version.outputs.tag }}"
+
+      - name: Push appcast update (retry)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Retry to reduce flakiness from transient GitHub/network issues
+          for attempt in 1 2 3 4 5; do
+            if git push origin main; then
+              exit 0
+            fi
+            echo "git push failed (attempt ${attempt}/5). Retrying..." >&2
+            sleep $((attempt * 15))
+          done
+
+          echo "git push failed after retries." >&2
+          exit 1

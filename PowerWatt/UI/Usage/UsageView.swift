@@ -112,7 +112,7 @@ struct UsageView: View {
             
             VStack(alignment: .leading, spacing: 8) {
                 Label {
-                    Text("Total Watts: Measured or derived from battery sensors")
+                    Text("Total Watts: Measured or derived from battery sensors (may be unavailable while charging)")
                 } icon: {
                     Image(systemName: "bolt.fill")
                         .foregroundStyle(.yellow)
@@ -136,7 +136,7 @@ struct UsageView: View {
             
             Divider()
             
-            Text("Per-app watts are estimates based on CPU time, wakeups, and disk I/O. They are proportionally allocated from the total system power when available.")
+            Text("Per-app watts are estimates based on CPU time, wakeups, and disk I/O. They are proportionally allocated from the total system power when available (often unavailable on AC while charging).")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
@@ -174,7 +174,8 @@ struct UsageView: View {
             
             TotalPowerChart(
                 data: viewModel.totalPowerChartData,
-                hasWattsData: viewModel.hasWattsData
+                hasWattsData: viewModel.hasWattsData,
+                isOnAC: viewModel.isOnAC
             )
             .frame(height: 180)
             .background(Color(.controlBackgroundColor).opacity(0.5))

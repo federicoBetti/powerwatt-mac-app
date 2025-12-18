@@ -5,14 +5,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description"
-    content="PowerWatt is a lightweight macOS menu bar app that shows real-time battery power usage (IN/OUT watts) with display modes that fit how you work." />
+    content="PowerWatt is a free macOS menu bar app that shows real-time power (IN/OUT watts), per-app energy usage, and top consumers—without clutter." />
   <meta name="color-scheme" content="light dark" />
 
   <meta property="og:title" content="PowerWatt for macOS" />
   <meta property="og:description"
-    content="See your Mac’s real-time battery power usage (IN/OUT watts) right in the menu bar." />
+    content="A free macOS menu bar app for real-time power (watts), per-app energy usage, and top consumers." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="assets/powerwatt-screenshot.png" />
+  <meta property="og:image" content="assets/full-app.png" />
 
   <title>PowerWatt for macOS</title>
 
@@ -207,6 +207,7 @@
       flex-wrap: wrap;
       gap: 12px;
       margin-top: 24px;
+      margin-bottom: 10px;
     }
 
     .btn {
@@ -237,6 +238,7 @@
     .fine {
       font-size: 0.85rem;
       color: var(--muted);
+      margin-top: 0;
     }
 
     .hero-media {
@@ -246,12 +248,52 @@
       border-radius: var(--radius);
     }
 
+    .hero-media .media-stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    figure {
+      margin: 0;
+    }
+
+    figcaption {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
     .shot {
       width: 100%;
       height: auto;
       border-radius: 12px;
       border: 1px solid var(--border);
       display: block;
+    }
+
+    .shot.strip {
+      border-radius: 10px;
+    }
+
+    .measure-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      margin-top: 18px;
+    }
+
+    .measure-grid article {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      min-height: 150px;
+    }
+
+    .measure-grid ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
     }
 
     .section {
@@ -368,6 +410,8 @@
         <span>PowerWatt</span>
       </a>
       <nav class="quick-nav" aria-label="Site">
+        <a href="#download">Download</a>
+        <a href="#measures">What it measures</a>
         <a href="#features">Features</a>
         <a href="#changelog">Change log</a>
         <a href="https://github.com/federicoBetti/powerwatt-mac-app" rel="noreferrer">GitHub</a>
@@ -379,7 +423,7 @@
     <div class="container">
       <section class="hero">
         <div>
-          <span class="tag">Menu bar utility · macOS 15.2+</span>
+          <span class="tag">Free · Menu bar utility · macOS 15.2+</span>
           <h1>Know your Mac’s real power draw.</h1>
           <p class="lead">PowerWatt shows real-time battery power usage—IN or OUT watts—without clutter. Pick the
             display
@@ -389,6 +433,8 @@
             <li>Instant net watts or separate IN/OUT readings</li>
             <li>Per-app energy tracking with Activity Monitor-style attribution</li>
             <li>Smoothing + refresh controls to tame noisy spikes</li>
+            <li>Sortable “Top Consumers” table with in-app unit explanations</li>
+            <li>Automatically falls back to Relative mode when total watts aren’t available</li>
             <li>Telemetry is optional and off unless you opt in</li>
           </ul>
 
@@ -396,17 +442,62 @@
             <a id="download-dmg" class="btn"
               href="https://github.com/federicoBetti/powerwatt-mac-app/releases/latest/download/PowerWatt.dmg">Download
               DMG</a>
-            <a id="download-pkg" class="btn"
-              href="https://github.com/federicoBetti/powerwatt-mac-app/releases/latest/download/PowerWatt.pkg">Download
-              PKG</a>
-            <a id="download-zip" class="btn secondary"
-              href="https://github.com/federicoBetti/powerwatt-mac-app/releases/latest/download/PowerWatt.zip">Download
-              ZIP</a>
+            <a class="btn secondary" href="https://www.buymeacoffee.com/iker44" rel="noreferrer">Buy me a coffee</a>
           </div>
-          <p class="fine">Runs in the menu bar only—no Dock icon, no distractions.</p>
+          <p class="fine">Free to download. Runs in the menu bar only. No Dock icon, no distractions.</p>
         </div>
         <div class="hero-media">
-          <img class="shot" src="assets/powerwatt-screenshot.png" alt="PowerWatt screenshot" />
+          <div class="media-stack">
+            <figure>
+              <img class="shot strip" src="assets/top-bar-example.png"
+                alt="PowerWatt shown in the macOS menu bar displaying watts" />
+              <figcaption>Menu bar view: quick watts at a glance.</figcaption>
+            </figure>
+            <figure>
+              <img class="shot" src="assets/full-app.png"
+                alt="PowerWatt Power Usage window showing total system power chart, energy by app chart, and a top consumers table" />
+              <figcaption>Usage view: total system power, per-app energy, and top consumers.</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section id="measures" class="section">
+        <h2>What PowerWatt measures</h2>
+        <p class="intro">PowerWatt combines battery sensors (when available) with Activity Monitor-style attribution to
+          help you understand both overall power draw and which apps are driving it.</p>
+
+        <div class="measure-grid">
+          <article>
+            <h3>Total system power (W)</h3>
+            <p>When your Mac exposes battery sensor data, PowerWatt shows total system power in watts.</p>
+            <ul>
+              <li><strong>OUT W</strong>: power leaving the battery (discharging)</li>
+              <li><strong>IN W</strong>: power going into the battery (charging)</li>
+              <li><strong>Net</strong>: IN − OUT, for one-number monitoring</li>
+            </ul>
+          </article>
+          <article>
+            <h3>Energy over time (Wh / mWh)</h3>
+            <p>Energy is power accumulated over time, shown per app and for the selected range.</p>
+            <ul>
+              <li>Energy helps compare apps across longer sessions</li>
+              <li>1 Wh = 1000 mWh</li>
+            </ul>
+          </article>
+          <article>
+            <h3>Per-app attribution (Watts or Relative)</h3>
+            <p>PowerWatt estimates per-app impact from CPU time, disk I/O, and wakeups.</p>
+            <ul>
+              <li><strong>Watts mode</strong>: allocates total system power across apps (when available)</li>
+              <li><strong>Relative mode</strong>: unitless “energy impact” score when total watts can’t be read</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="info-box">
+          Total system watts are often unavailable while plugged in/charging. When that happens, PowerWatt automatically
+          prefers Relative mode so your charts and rankings remain meaningful.
         </div>
       </section>
 
@@ -418,11 +509,11 @@
         <div class="feature-list">
           <article>
             <h3>Real-time battery watts</h3>
-            <p>Reads system voltage and current directly from macOS to show accurate IN vs OUT wattage.</p>
+            <p>Shows IN/OUT watts from battery sensors when available (and explains when total watts can’t be read).</p>
           </article>
           <article>
             <h3>Per-app energy tracking</h3>
-            <p>See which apps consume the most power with Activity Monitor-style attribution and 24-hour history.</p>
+            <p>See which apps consume the most energy with Activity Monitor-style attribution and 24-hour history.</p>
           </article>
           <article>
             <h3>Two display modes</h3>
@@ -430,7 +521,13 @@
           </article>
           <article>
             <h3>Usage charts and insights</h3>
-            <p>Total power over time, stacked per-app energy charts, and ranked top consumers list.</p>
+            <p>Total power over time, stacked per-app energy charts, and a top consumers table with sortable columns and
+              in-app unit explanations.</p>
+          </article>
+          <article>
+            <h3>Watts or Relative (auto)</h3>
+            <p>When total system watts are unavailable (often while charging), PowerWatt automatically uses Relative
+              mode so rankings and charts still work.</p>
           </article>
           <article>
             <h3>Smoothing controls</h3>
@@ -448,6 +545,11 @@
             <h3>Privacy-first</h3>
             <p>No telemetry is sent unless you explicitly opt in. All usage data stays on your Mac.</p>
           </article>
+          <article>
+            <h3>Free &amp; open source</h3>
+            <p>PowerWatt is free to download and open source. If it helps, you can support development with a coffee.
+            </p>
+          </article>
         </div>
       </section>
 
@@ -455,7 +557,7 @@
         <h2>Install in two steps</h2>
         <div class="install-steps">
           <ol>
-            <li>Download the <code>PowerWatt.pkg</code> (recommended) or <code>PowerWatt.dmg</code>.</li>
+            <li>Download the <code>PowerWatt.dmg</code>.</li>
             <li>Install into <code>/Applications</code>, launch the app, and open preferences from the menu bar.</li>
           </ol>
         </div>
@@ -504,23 +606,28 @@
               macOS.</p>
           </details>
           <details>
+            <summary>Why are total watts sometimes unavailable while charging?</summary>
+            <p>On some Macs, macOS does not expose reliable total power while plugged in/charging for long stretches. In
+              those cases PowerWatt shows Relative metrics instead, so you still get useful rankings and charts.</p>
+          </details>
+          <details>
             <summary>Why do values sometimes jump?</summary>
             <p>Short spikes are normal as macOS shifts CPU/GPU load. Lower the refresh interval or enable smoothing to
               average them out.</p>
           </details>
           <details>
             <summary>How is per-app power estimated?</summary>
-            <p>PowerWatt uses Activity Monitor-style attribution based on CPU time, disk I/O, and system wakeups. The 
+            <p>PowerWatt uses Activity Monitor-style attribution based on CPU time, disk I/O, and system wakeups. The
               total system power is proportionally allocated to apps based on their relative activity.</p>
           </details>
           <details>
             <summary>Does it work on desktops?</summary>
             <p>PowerWatt relies on battery stats for total watts, so it’s intended for Macs with a battery. The per-app
-              tracking works on any Mac but shows relative scores instead of estimated watts.</p>
+              tracking works on any Mac but may show relative scores instead of estimated watts.</p>
           </details>
           <details>
             <summary>Where is usage data stored?</summary>
-            <p>All usage data is stored locally in SQLite under ~/Library/Application Support/PowerWatt. 
+            <p>All usage data is stored locally in SQLite under ~/Library/Application Support/PowerWatt.
               No per-app data is ever transmitted.</p>
           </details>
           <details>
@@ -532,13 +639,14 @@
       </section>
 
       <footer>
-        <div>© PowerWatt — Open-source macOS utility built for quick, accurate power visibility.</div>
+        <div>© PowerWatt — Free, open-source macOS utility built for quick, accurate power visibility.</div>
         <div class="footer-links">
           <a href="privacy.html">Privacy</a>
           <a href="appcast.xml">Appcast</a>
           <a href="https://github.com/federicoBetti/powerwatt-mac-app" rel="noreferrer">Source</a>
           <a href="https://github.com/federicoBetti/powerwatt-mac-app/releases/latest" rel="noreferrer">Latest
             release</a>
+          <a href="https://www.buymeacoffee.com/iker44" rel="noreferrer">Buy me a coffee</a>
         </div>
       </footer>
     </div>
@@ -546,5 +654,3 @@
 </body>
 
 </html>
-
-

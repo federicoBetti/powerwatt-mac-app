@@ -153,7 +153,9 @@ struct AppStackedEnergyChart: View {
     }
     
     private func formatRelative(_ share: Double) -> String {
-        let pct = max(0, min(1, share)) * 100
+        // Relative values are expected to be 0..1 (shares), but avoid clamping the upper bound
+        // so issues don't get silently hidden as repeated "100%".
+        let pct = max(0, share) * 100
         if pct >= 10 {
             return String(format: "%.0f%%", pct)
         }

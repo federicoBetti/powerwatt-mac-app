@@ -12,6 +12,7 @@ import Charts
 struct TotalPowerChart: View {
     let data: [ChartDataPoint]
     let hasWattsData: Bool
+    let isOnAC: Bool
     
     var body: some View {
         if data.isEmpty {
@@ -110,13 +111,21 @@ struct TotalPowerChart: View {
             Text("Total watts unavailable")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Text("System power data not available. Showing relative metrics instead.")
+            Text(unavailableMessage)
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
+    }
+    
+    private var unavailableMessage: String {
+        if isOnAC {
+            return "Total system watts are often unavailable while plugged in/charging. Showing relative metrics instead."
+        }
+        
+        return "System power data not available. Showing relative metrics instead."
     }
     
     // MARK: - Helpers
@@ -171,7 +180,7 @@ struct TotalPowerChart: View {
         )
     }
     
-    return TotalPowerChart(data: sampleData, hasWattsData: true)
+    return TotalPowerChart(data: sampleData, hasWattsData: true, isOnAC: true)
         .frame(width: 500, height: 200)
         .padding()
 }
