@@ -3,12 +3,12 @@
     <channel>
         <title>PowerWatt</title>
         <item>
-            <title>1.0.4</title>
-            <pubDate>Thu, 18 Dec 2025 09:56:10 +0000</pubDate>
-            <sparkle:version>5</sparkle:version>
-            <sparkle:shortVersionString>1.0.4</sparkle:shortVersionString>
+            <title>1.1.2</title>
+            <pubDate>Thu, 18 Dec 2025 18:15:35 +0000</pubDate>
+            <sparkle:version>8</sparkle:version>
+            <sparkle:shortVersionString>1.1.2</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.2</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/federicoBetti/powerwatt-mac-app/releases/download/v1.0.4/PowerWatt.zip" length="1885621" type="application/octet-stream" sparkle:edSignature="dP1nePPcb2F0wePbuL27Gnp58gONv37WS2WqwotxxzLELSUZW4z8Cl2JUISkfTWFu88a0YLLr52thi4/yjkABw=="/>
+            <enclosure url="https://github.com/federicoBetti/powerwatt-mac-app/releases/download/v1.1.2/PowerWatt.zip" length="2049503" type="application/octet-stream" sparkle:edSignature="COaApil9v0pC27XP8J+xIQjT2rXL8P/dQe3WxdCRJF6zvp+JtdFvruUeBdLJ6vtRAqvKWKLHLsPiHBQty9smDQ=="/>
         </item>
     </channel>
 </rss>
